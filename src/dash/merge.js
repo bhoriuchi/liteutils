@@ -1,12 +1,43 @@
 import isArray from './isArray'
 import isHash from './isHash'
 import isDate from './isDate'
+import forEach from './forEach'
+import map from './map'
+
+function _merge (target, source) {
+  forEach(source, (s, k) => {
+    let t = target[k]
+
+    if (t === undefined && isHash(s)) {
+      t = _merge({}, s)
+    } else if (isHash(t) && isHash(s)) {
+      t = _merge(t, s)
+    } else if (isArray(s)) {
+      t = map(s, (val) => {
+        if (isHash(val)) return _merge({}, val)
+        if (isArray(val)) return _merge([], val)
+        return val
+      })
+    } else if (isDate(s)) {
+      t = new Date(s)
+    } else {
+      t = s
+    }
+  })
+}
 
 export default function merge () {
   let args = [ ...arguments ]
+
   if (args.length === 0) return {}
   else if (args.length === 1) return args[0]
   else if (!isHash(args[0])) return {}
+
+  // new code
+  let target = args[0]
+  let sources = args.slice(1)
+
+  /*
   let targetObject = args[0]
   let sources = args.slice(1)
 
@@ -44,4 +75,9 @@ export default function merge () {
     if (isHash(sources[k])) _merge(targetObject, sources[k])
   }
   return targetObject
+  */
+  forEach(sources, (source) => {
+    if (isHash(source)) _merge(target, source)
+  })
+  return target
 }
