@@ -16,7 +16,8 @@ lib.forEach(lib, (fn, name) => {
   util[name] = fn
   if (fn._chainable === true) {
     Dash.prototype[name] = function () {
-      this._value = fn(this._value)
+      let args = [this._value].concat([ ...arguments ])
+      this._value = fn.apply(this, args)
       return this
     }
   }

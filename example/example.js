@@ -57,6 +57,8 @@ lite('herere').tryit()
 import dash from '../src/dash/main'
 
 console.log(dash.keys({a: 1, b: 2}))
-console.log(dash({a: 1, b: 2}).keys())
+console.log(dash({a: 1, b: 2}).keys().map((v) => {
+  return { a: v }
+}).value())
 
 console.log(dash.keys(dash(1)))
