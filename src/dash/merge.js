@@ -3,25 +3,28 @@ import isHash from './isHash'
 import isDate from './isDate'
 import forEach from './forEach'
 import map from './map'
+import includes from './includes'
 
-function _merge (target, source) {
+function _merge (target, source, seen = []) {
+  if (includes(seen, source) || includes(seen, source)) return target
+
   forEach(source, (s, k) => {
     let t = target[k]
 
     if (t === undefined && isHash(s)) {
-      t = _merge({}, s)
+      target[k] = _merge({}, s)
     } else if (isHash(t) && isHash(s)) {
-      t = _merge(t, s)
+      target[k] = _merge(t, s)
     } else if (isArray(s)) {
-      t = map(s, (val) => {
+      target[k] = map(s, (val) => {
         if (isHash(val)) return _merge({}, val)
         if (isArray(val)) return _merge([], val)
         return val
       })
     } else if (isDate(s)) {
-      t = new Date(s)
+      target[k] = new Date(s)
     } else {
-      t = s
+      target[k] = s
     }
   })
 }
