@@ -3,7 +3,5 @@ export default function escapeRegExp (str) {
   let reRegExpChar = /[\\^$.*+?()[\]{}|]/g
   let reHasRegExpChar = RegExp(reRegExpChar.source)
   str = toString(str)
-  return (str && reHasRegExpChar.test(str))
-    ? str.replace(reRegExpChar, '\\$&')
-    : str
+  return (str && reHasRegExpChar.test(str)) ? str.replace(reRegExpChar, '\\$&') : str
 }

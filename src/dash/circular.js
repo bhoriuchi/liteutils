@@ -2,19 +2,20 @@ import forEach from './forEach'
 import isObject from './isObject'
 import isFunction from './isFunction'
 import contains from './contains'
+import clone from './clone'
 
-export default function circular (obj) {
-  let circularEx = (obj, value = '[Circular]', key = null, seen = []) => {
-    seen.push(obj)
-    if (isObject(obj)) {
-      forEach(obj, (o, i) => {
-        if (contains(seen, o)) obj[i] = isFunction(value) ? value(obj, key, seen.slice(0)) : value
-        else circularEx(o, value, i, seen.slice(0))
+export default function circular (obj, value = '[Circular]') {
+  let circularEx = (_obj, key = null, seen = []) => {
+    seen.push(_obj)
+    if (isObject(_obj)) {
+      forEach(_obj, (o, i) => {
+        if (contains(seen, o)) _obj[i] = isFunction(value) ? value(_obj, key, clone(seen)) : value
+        else circularEx(o, i, clone(seen))
       })
     }
-    return obj
+    return _obj
   }
 
   if (!obj) throw new Error('circular requires an object to examine')
-  return circularEx(obj)
+  return circularEx(obj, value)
 }
