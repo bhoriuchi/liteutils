@@ -1,5 +1,11 @@
 import isArray from './isArray'
 
-export default function includes (obj, key) {
+let includes = function (obj, key) {
   return isArray(obj) && obj.indexOf(key) !== -1
 }
+
+includes._chainable = true
+includes._accepts = [Array]
+includes._dependencies = ['dash.isArray']
+
+export default includes

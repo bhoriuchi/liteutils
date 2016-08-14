@@ -1,4 +1,4 @@
-export default function pretty (obj, space = '  ') {
+let pretty = function (obj, space = '  ') {
   try {
     return JSON.stringify(obj, null, space)
   } catch (err) {
@@ -6,3 +6,9 @@ export default function pretty (obj, space = '  ') {
     return ''
   }
 }
+
+pretty._chainable = true
+pretty._accepts = [Object, Array, Date]
+pretty._dependencies = []
+
+export default pretty

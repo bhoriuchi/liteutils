@@ -2,6 +2,16 @@ import isArray from './isArray'
 import isDate from './isDate'
 import isObject from './isObject'
 
-export default function isHash (obj) {
+let isHash = function (obj) {
   return isObject(obj) && !isArray(obj) && !isDate(obj)
 }
+
+isHash._chainable = true
+isHash._accepts = ['ANY']
+isHash._dependencies = [
+  'dash.isArray',
+  'dash.isDate',
+  'dash.isObject'
+]
+
+export default isHash

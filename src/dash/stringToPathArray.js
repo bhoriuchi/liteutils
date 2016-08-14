@@ -1,4 +1,4 @@
-export default function stringToPathArray (pathString) {
+let stringToPathArray = function (pathString) {
   // taken from lodash - https://github.com/lodash/lodash
   let pathRx = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(\.|\[\])(?:\4|$))/g
   let pathArray = []
@@ -11,3 +11,9 @@ export default function stringToPathArray (pathString) {
   }
   return pathArray
 }
+
+stringToPathArray._chainable = true
+stringToPathArray._accepts = [String]
+stringToPathArray._dependencies = []
+
+export default stringToPathArray

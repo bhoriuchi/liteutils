@@ -1,5 +1,11 @@
 import isFunction from './isFunction'
 
-export default function isPromise (obj) {
+let isPromise = function (obj) {
   return obj && isFunction(obj.then) && isFunction(obj.catch)
 }
+
+isPromise._chainable = true
+isPromise._accepts = ['ANY']
+isPromise._dependencies = ['dash.isFunction']
+
+export default isPromise

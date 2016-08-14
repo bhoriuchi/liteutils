@@ -1,7 +1,7 @@
 import isArray from './isArray'
 import stringToPathArray from './stringToPathArray'
 
-export default function get (obj, path, defaultValue) {
+let get = function (obj, path, defaultValue) {
   let value = obj
   let fields = isArray(path) ? path : stringToPathArray(path)
   if (fields.length === 0) return defaultValue
@@ -16,3 +16,12 @@ export default function get (obj, path, defaultValue) {
   }
   return value
 }
+
+get._chainable = true
+get._accepts = [Object, Array]
+get._dependencies = [
+  'dash.isArray',
+  'dash.stringToPathArray'
+]
+
+export default get

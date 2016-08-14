@@ -1,7 +1,7 @@
 import forEach from './forEach'
 import includes from './includes'
 
-export default function without () {
+let without = function () {
   let output = []
   let args = [ ...arguments ]
   if (args.length < 2) return args.length ? args[0] : []
@@ -12,3 +12,12 @@ export default function without () {
   })
   return output
 }
+
+without._chainable = true
+without._accepts = [Array]
+without._dependencies = [
+  'dash.forEach',
+  'dash.includes'
+]
+
+export default without

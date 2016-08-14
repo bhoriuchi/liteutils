@@ -1,4 +1,19 @@
-export default function union () {
+import isArray from './isArray'
+
+let union = function () {
   let args = [ ...arguments ]
-  return [ ...new Set(args.reduce((prev, cur) => [ ...prev ].concat([ ...cur ]), [])) ]
+  if (!args.length) return []
+
+  let u = args.reduce((prev, cur) => {
+    if (!isArray(prev) || !isArray(cur)) return []
+    return [ ...prev ].concat([ ...cur ])
+  }, [])
+
+  return [ ...new Set(u) ]
 }
+
+union._chainable = true
+union._accepts = ['ANY']
+union._dependencies = ['dash.isArray']
+
+export default union

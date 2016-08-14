@@ -18,7 +18,7 @@ lib.forEach(lib, (fn, name) => {
     Dash.prototype[name] = function () {
       let args = [this._value].concat([ ...arguments ])
       this._value = fn.apply(this, args)
-      return this
+      return fn._terminates ? this._value : this
     }
   }
 })

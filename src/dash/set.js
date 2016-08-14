@@ -3,7 +3,7 @@ import isNumber from './isNumber'
 import stringToPathArray from './stringToPathArray'
 import forEach from './forEach'
 
-export default function set (obj, path, val) {
+let set = function (obj, path, val) {
   let fields = isArray(path) ? path : stringToPathArray(path)
 
   forEach(fields, (field, idx) => {
@@ -12,3 +12,14 @@ export default function set (obj, path, val) {
     obj = obj[field]
   })
 }
+
+set._chainable = true
+set._accepts = [Object, Array]
+set._dependencies = [
+  'dash.isArray',
+  'dash.isNumber',
+  'dash.stringToPathArray',
+  'dash.forEach'
+]
+
+export default set

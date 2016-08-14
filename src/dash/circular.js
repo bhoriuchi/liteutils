@@ -4,7 +4,7 @@ import isFunction from './isFunction'
 import contains from './contains'
 import clone from './clone'
 
-export default function circular (obj, value = '[Circular]') {
+let circular = function (obj, value = '[Circular]') {
   let circularEx = (_obj, key = null, seen = []) => {
     seen.push(_obj)
     if (isObject(_obj)) {
@@ -19,3 +19,15 @@ export default function circular (obj, value = '[Circular]') {
   if (!obj) throw new Error('circular requires an object to examine')
   return circularEx(obj, value)
 }
+
+circular._chainable = true
+circular._accepts = [Object, Array]
+circular._dependencies = [
+  'dash.forEach',
+  'dash.isObject',
+  'dash.isFunction',
+  'dash.contains',
+  'dash.clone'
+]
+
+export default circular

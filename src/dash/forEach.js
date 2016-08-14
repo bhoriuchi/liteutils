@@ -1,6 +1,6 @@
 import isArray from './isArray'
 
-export default function forEach (obj, fn) {
+let forEach = function (obj, fn) {
   try {
     if (isArray(obj)) {
       let idx = 0
@@ -17,3 +17,9 @@ export default function forEach (obj, fn) {
     return
   }
 }
+
+forEach._chainable = true
+forEach._accepts = [Object, Array]
+forEach._dependencies = ['dash.isArray']
+
+export default forEach

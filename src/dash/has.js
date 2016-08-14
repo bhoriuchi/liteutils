@@ -2,7 +2,7 @@ import forEach from './forEach'
 import isArray from './isArray'
 import stringToPathArray from './stringToPathArray'
 
-export default function has (obj, path) {
+let has = function (obj, path) {
   let found = true
   let fields = isArray(path) ? path : stringToPathArray(path)
   if (!fields.length) return false
@@ -15,3 +15,13 @@ export default function has (obj, path) {
   })
   return found
 }
+
+has._chainable = true
+has._accepts = [Object, Array]
+has._dependencies = [
+  'dash.forEach',
+  'dash.isArray',
+  'dash.stringToPathArray'
+]
+
+export default has

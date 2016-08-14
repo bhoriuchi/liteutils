@@ -1,6 +1,6 @@
 import forEach from './forEach'
 
-export default function mapWith (obj, fn) {
+let mapWith = function (obj, fn) {
   let newObj = []
   forEach(obj, (v, k) => {
     let value = fn(v, k)
@@ -8,3 +8,9 @@ export default function mapWith (obj, fn) {
   })
   return newObj
 }
+
+mapWith._chainable = true
+mapWith._accepts = [Object, Array]
+mapWith._dependencies = ['dash.forEach']
+
+export default mapWith

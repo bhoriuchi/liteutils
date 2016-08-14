@@ -1,7 +1,7 @@
 import isHash from './isHash'
 import forEach from './forEach'
 
-export default function pickBy (obj, fn) {
+let pickBy = function (obj, fn) {
   let newObj = {}
   if (!isHash(obj)) return newObj
   forEach(obj, (v, k) => {
@@ -9,3 +9,12 @@ export default function pickBy (obj, fn) {
   })
   return newObj
 }
+
+pickBy._chainable = true
+pickBy._accepts = [Object]
+pickBy._dependencies = [
+  'dash.isHash',
+  'dash.forEach'
+]
+
+export default pickBy

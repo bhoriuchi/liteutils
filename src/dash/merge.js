@@ -29,7 +29,7 @@ function _merge (target, source, seen = []) {
   return target
 }
 
-export default function merge () {
+let merge = function () {
   let args = [ ...arguments ]
 
   if (args.length === 0) return {}
@@ -44,3 +44,16 @@ export default function merge () {
   })
   return target
 }
+
+merge._chainable = true
+merge._accepts = [Object]
+merge._dependencies = [
+  'dash.isArray',
+  'dash.isHash',
+  'dash.isDate',
+  'dash.forEach',
+  'dash.includes',
+  'dash.clone'
+]
+
+export default merge

@@ -1,7 +1,7 @@
 import isHash from './isHash'
 import forEach from './forEach'
 
-export default function omitBy (obj, fn) {
+let omitBy = function (obj, fn) {
   let newObj = {}
   if (!isHash(obj)) return newObj
   forEach(obj, (v, k) => {
@@ -9,3 +9,12 @@ export default function omitBy (obj, fn) {
   })
   return newObj
 }
+
+omitBy._chainable = true
+omitBy._accepts = [Object]
+omitBy._dependencies = [
+  'dash.isHash',
+  'dash.forEach'
+]
+
+export default omitBy

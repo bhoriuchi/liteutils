@@ -1,6 +1,6 @@
 import forEach from './forEach'
 
-export default function find (obj, fn, def) {
+let find = function (obj, fn, def) {
   let found = def || null
   forEach(obj, function (v, k) {
     if (fn(v, k)) {
@@ -10,3 +10,9 @@ export default function find (obj, fn, def) {
   })
   return found
 }
+
+find._chainable = true
+find._accepts = [Object, Array]
+find._dependencies = ['dash.forEach']
+
+export default find

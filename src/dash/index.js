@@ -2,13 +2,16 @@ import capitalize from './capitalize'
 import circular from './circular'
 import clone from './clone'
 import contains from './contains'
+import difference from './difference'
 import ensureArray from './ensureArray'
+import escapeRegExp from './escapeRegExp'
 import filter from './filter'
 import find from './filter'
 import forEach from './forEach'
 import get from './get'
 import has from './has'
 import includes from './includes'
+import intersection from './intersection'
 import isArray from './isArray'
 import isBoolean from './isBoolean'
 import isDate from './isDate'
@@ -29,6 +32,7 @@ import pretty from './pretty'
 import range from './range'
 import set from './set'
 import stringify from './stringify'
+import stringToPathArray from './stringToPathArray'
 import union from './union'
 import uniq from './uniq'
 import without from './without'
@@ -38,13 +42,16 @@ export default {
   circular,
   clone,
   contains,
+  difference,
   ensureArray,
+  escapeRegExp,
   filter,
   find,
   forEach,
   get,
   has,
   includes,
+  intersection,
   isArray,
   isBoolean,
   isDate,
@@ -65,6 +72,7 @@ export default {
   range,
   set,
   stringify,
+  stringToPathArray,
   union,
   uniq,
   without
