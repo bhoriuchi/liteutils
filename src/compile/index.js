@@ -2,6 +2,8 @@ import path from 'path'
 import FileSystem from 'fs'
 import _ from 'lodash'
 import Promise from 'bluebird'
+import { rollup } from 'rollup'
+import babel from 'rollup-plugin-babel'
 import dash from '../dash'
 
 let fs = Promise.promisifyAll(FileSystem)
@@ -9,7 +11,10 @@ let fs = Promise.promisifyAll(FileSystem)
 let libs = { dash }
 
 // determine source path during dev or packaged usage
-let srcPath = path.resolve(__dirname, __dirname.match(/\/liteutils\/src\/compile$/) ? '../../src' : './src')
+let baseDir = __dirname.replace(/(.*\/liteutils).*/, '$1')
+let srcPath = path.resolve(baseDir, './src')
+let buildPath = path.resolve(baseDir, './build')
+let compilePath = path.resolve(baseDir, './compiled')
 
 // copies a file
 export default function copy (src, dest, encoding = 'utf8', modifier) {
@@ -85,32 +90,91 @@ export default {
 }`
 }
 
+export function buildIndex (lib) {
+  let chainName = `${lib.charAt(0).toUpperCase()}${lib.slice(1).toLowerCase()}Chain`
+
+  return `import _${lib} from './${lib}'
+  
+let ${chainName} = function (obj) {
+  this._value = obj
+}
+${chainName}.prototype.value = function () {
+  return this._value
+}
+
+let ${lib} = function (obj) {
+  return new ${chainName}(obj)
+}
+
+for (const name in _${lib}) {
+  let fn = _${lib}[name]
+  ${lib}[name] = fn
+  if (fn._chainable === true) {
+    ${chainName}.prototype[name] = function () {
+      let args = [this._value].concat([ ...arguments ])
+      this._value = fn.apply(this, args)
+      return fn._terminates ? this._value : this
+    }
+  }
+}
+
+export default ${lib}`
+}
+
 // builds/compiles the package
 export default function compile (config, dir, options = {}) {
-  dir = dir || path.resolve(__dirname, './compiled')
+  // dir = dir || path.resolve(baseDir, './compiled')
   let encoding = options.encoding || 'utf8'
   let libsToBuild = []
   config = resolveDependencies(normalizeConfig(config))
 
-  console.log(config)
-
-  // clean the build directory
-  return clean(dir, '.liteutils').then(() => {
-    // copy each file in the config
+  // clean the build directory and copy all the source files
+  return clean(compilePath, '.babelrc').then(() => {
     return Promise.each(config, (c) => {
       libsToBuild = _.union(libsToBuild, [c.type])
       let srcFile = path.resolve(srcPath, c.type, `${c.name}.js`)
-      let dstFile = path.resolve(dir, `${c.type}.${c.name}.js`)
+      let dstFile = path.resolve(compilePath, `${c.type}.${c.name}.js`)
       return copy(srcFile, dstFile, encoding, (data) => {
         // prefix import file names with type.
-        return data.replace(/(^import.*from\s+'\.\/)(.*)(')/gm, `$1${c.type}.$2$3`)
+        // filter out dependencies since not necessary in built lib
+        return data
+          .replace(/(^import.*from\s+'\.\/)(.*)(')/gm, `$1${c.type}.$2$3`)
+          .replace(/^.*\._dependencies.*\n$/gm, '')
       })
     })
   }).then(() => {
+    // build each main library
     return Promise.each(libsToBuild, (libName) => {
-      let libFile = path.resolve(dir, `${libName}.js`)
+      let libFile = path.resolve(compilePath, `${libName}.js`)
       let libData = buildLib(config, libName)
       return fs.writeFileAsync(libFile, libData, { encoding })
+    })
+  }).then(() => {
+    // build each module library
+    return Promise.each(libsToBuild, (libName) => {
+      let libFile = path.resolve(compilePath, `${libName}.index.js`)
+      let libData = buildIndex(libName)
+      return fs.writeFileAsync(libFile, libData, { encoding })
+    })
+  }).then(() => {
+    // do rollup builds
+    return Promise.each(libsToBuild, (libName) => {
+      let entryPath = path.resolve(compilePath, `${libName}.index.js`)
+      let destPath = path.resolve(compilePath, `litedash.${libName}.js`)
+      return rollup({
+        entry: entryPath,
+        plugins: [ babel() ]
+      }).then((bundle) => {
+        return bundle.write({
+          format: 'cjs',
+          dest: destPath
+        })
+      })
+    }).then(() => {
+      if (options.postClean !== false) {
+        let except = _.union(_.map(libsToBuild, (l) => `litedash.${l}.js`), ['.babelrc'])
+        return clean(compilePath, except)
+      }
     })
   })
 }
