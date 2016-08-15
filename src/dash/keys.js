@@ -9,7 +9,6 @@ let keys = function (obj) {
   }
 }
 
-keys._chainable = true
 keys._accepts = [Object, Array]
 keys._dependencies = [
   'dash.isArray',

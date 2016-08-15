@@ -10,7 +10,6 @@ let omitBy = function (obj, fn) {
   return newObj
 }
 
-omitBy._chainable = true
 omitBy._accepts = [Object]
 omitBy._dependencies = [
   'dash.isHash',

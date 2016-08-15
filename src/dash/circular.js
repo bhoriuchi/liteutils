@@ -20,7 +20,6 @@ let circular = function (obj, value = '[Circular]') {
   return circularEx(obj, value)
 }
 
-circular._chainable = true
 circular._accepts = [Object, Array]
 circular._dependencies = [
   'dash.forEach',

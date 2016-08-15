@@ -1,26 +1,27 @@
-import lib from './index'
+import _dash from './index' // Replace with dash
 
-let Dash = function (obj) {
+let DashChain = function (obj) {
   this._value = obj
 }
 
-Dash.prototype.value = function () {
+DashChain.prototype.value = function () {
   return this._value
 }
 
-let util = function (obj) {
-  return new Dash(obj)
+let dash = function (obj) {
+  return new DashChain(obj)
 }
 
-lib.forEach(lib, (fn, name) => {
-  util[name] = fn
-  if (fn._chainable === true) {
-    Dash.prototype[name] = function () {
+for (const name in _dash) {
+  let fn = _dash[name]
+  dash[name] = fn
+  if (fn._chainable !== false) {
+    DashChain.prototype[name] = function () {
       let args = [this._value].concat([ ...arguments ])
       this._value = fn.apply(this, args)
-      return fn._terminates ? this._value : this
+      return fn._terminates == true ? this._value : this
     }
   }
-})
+}
 
-export default util
+export default dash

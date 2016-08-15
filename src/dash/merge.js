@@ -45,7 +45,6 @@ let merge = function () {
   return target
 }
 
-merge._chainable = true
 merge._accepts = [Object]
 merge._dependencies = [
   'dash.isArray',

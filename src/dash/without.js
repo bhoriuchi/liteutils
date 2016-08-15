@@ -13,7 +13,6 @@ let without = function () {
   return output
 }
 
-without._chainable = true
 without._accepts = [Array]
 without._dependencies = [
   'dash.forEach',

@@ -13,7 +13,6 @@ let set = function (obj, path, val) {
   })
 }
 
-set._chainable = true
 set._accepts = [Object, Array]
 set._dependencies = [
   'dash.isArray',

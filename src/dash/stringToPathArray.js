@@ -12,7 +12,6 @@ let stringToPathArray = function (pathString) {
   return pathArray
 }
 
-stringToPathArray._chainable = true
 stringToPathArray._accepts = [String]
 stringToPathArray._dependencies = []
 

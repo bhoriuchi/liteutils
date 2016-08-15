@@ -6,7 +6,6 @@ let map = function (obj, fn) {
   return output
 }
 
-map._chainable = true
 map._accepts = [Object, Array]
 map._dependencies = ['dash.forEach']
 

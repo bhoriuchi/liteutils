@@ -7,7 +7,6 @@ let pretty = function (obj, space = '  ') {
   }
 }
 
-pretty._chainable = true
 pretty._accepts = [Object, Array, Date]
 pretty._dependencies = []
 

@@ -18,7 +18,6 @@ let forEach = function (obj, fn) {
   }
 }
 
-forEach._chainable = true
 forEach._accepts = [Object, Array]
 forEach._dependencies = ['dash.isArray']
 

@@ -11,7 +11,6 @@ let stringify = function (obj) {
   return ''
 }
 
-stringify._chainable = true
 stringify._accepts = ['ANY']
 stringify._dependencies = [
   'dash.has',

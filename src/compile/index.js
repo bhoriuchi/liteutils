@@ -4,6 +4,7 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 import { rollup } from 'rollup'
 import babel from 'rollup-plugin-babel'
+import uglify from 'rollup-plugin-uglify'
 import dash from '../dash'
 
 let fs = Promise.promisifyAll(FileSystem)
@@ -90,39 +91,73 @@ export default {
 }`
 }
 
-export function buildIndex (lib) {
-  let chainName = `${lib.charAt(0).toUpperCase()}${lib.slice(1).toLowerCase()}Chain`
+// rewrite of compile with more versitile config structure
+function compile1 (config, dir, options = {}) {
+  let encoding = options.encoding || 'utf8'
 
-  return `import _${lib} from './${lib}'
-  
-let ${chainName} = function (obj) {
-  this._value = obj
-}
-${chainName}.prototype.value = function () {
-  return this._value
+  return clean(compilePath, '.babelrc').then(() => {
+    let libs = _.keys(config)
+    return Promise.each(libs, (type) => {
+      let libConfig = config[type]
+      let includes = _.map(libConfig.include, (name) => { type, name })
+      let deps = resolveDependencies(normalizeConfig(includes))
+
+      return Promise.each(deps, (d) => {
+        let srcFile = path.resolve(srcPath, d.type, `${d.name}.js`)
+        let dstFile = path.resolve(compilePath, `${d.type}.${d.name}.js`)
+        return copy(srcFile, dstFile, encoding, (data) => {
+          // prefix import file names with type.
+          // filter out dependencies since not necessary in built lib
+          return data
+            .replace(/(^import.*from\s+'\.\/)(.*)(')/gm, `$1${d.type}.$2$3`)
+            .replace(/^.*\._dependencies.*\n$/gm, '')
+        })
+      }).then(() => {
+        let libFile = path.resolve(compilePath, `${type}.js`)
+        let libData = buildLib(deps, type)
+        return fs.writeFileAsync(libFile, libData, { encoding })
+      }).then(() => {
+        let modSrc = path.resolve(srcPath, type, 'main.js')
+        let modDest = path.resolve(compilePath, `${type}.index.js`)
+        return copy(modSrc, modDest, encoding, (data) => {
+          data = data
+            .replace(/(^import.*from\s+'\.\/)(.*)('\s+\/\/\s+Replace\s+with\s+)(.*)(\n)/gm, `$1$4$3\n`)
+            .replace(/'\.\.\//gm, '\'./')
+
+          console.log(data)
+          return data
+        })
+      }).then(() => {
+        let entry = path.resolve(compilePath, `${type}.index.js`)
+        let destPath = path.resolve(compilePath, `litedash.${type}.js`)
+        let plugins = [ babel() ]
+        if (libConfig.minify) plugins.push(uglify())
+        return rollup({
+          entry,
+          plugins
+        }).then((bundle) => {
+          return bundle.write({
+            format: 'cjs',
+            dest: destPath
+          })
+        })
+      })
+    }).then(() => {
+      if (options.postClean !== false) {
+        let except = _.union(_.map(libs, (l) => `litedash.${l}.js`), ['.babelrc'])
+        return clean(compilePath, except)
+      }
+    })
+  })
 }
 
-let ${lib} = function (obj) {
-  return new ${chainName}(obj)
-}
 
-for (const name in _${lib}) {
-  let fn = _${lib}[name]
-  ${lib}[name] = fn
-  if (fn._chainable === true) {
-    ${chainName}.prototype[name] = function () {
-      let args = [this._value].concat([ ...arguments ])
-      this._value = fn.apply(this, args)
-      return fn._terminates ? this._value : this
-    }
-  }
-}
 
-export default ${lib}`
-}
+
+
 
 // builds/compiles the package
-export default function compile (config, dir, options = {}) {
+function compile (config, dir, options = {}) {
   // dir = dir || path.resolve(baseDir, './compiled')
   let encoding = options.encoding || 'utf8'
   let libsToBuild = []
@@ -152,9 +187,13 @@ export default function compile (config, dir, options = {}) {
   }).then(() => {
     // build each module library
     return Promise.each(libsToBuild, (libName) => {
-      let libFile = path.resolve(compilePath, `${libName}.index.js`)
-      let libData = buildIndex(libName)
-      return fs.writeFileAsync(libFile, libData, { encoding })
+      let modSrc = path.resolve(srcPath, libName, 'main.js')
+      let modDest = path.resolve(compilePath, `${libName}.index.js`)
+      return copy(modSrc, modDest, encoding, (data) => {
+        return data
+          .replace(/(^import.*from\s+'\.\/)(.*)('\s+\/\/\s+Replace\s+with\s+)(.*)(\n)/gm, `$1$4$3\n`)
+          .replace(/'\.\.\//gm, '\'./')
+      })
     })
   }).then(() => {
     // do rollup builds
@@ -163,7 +202,10 @@ export default function compile (config, dir, options = {}) {
       let destPath = path.resolve(compilePath, `litedash.${libName}.js`)
       return rollup({
         entry: entryPath,
-        plugins: [ babel() ]
+        plugins: [
+          babel(),
+          uglify()
+        ]
       }).then((bundle) => {
         return bundle.write({
           format: 'cjs',
@@ -178,3 +220,5 @@ export default function compile (config, dir, options = {}) {
     })
   })
 }
+
+export default compile1

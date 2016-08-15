@@ -16,7 +16,6 @@ let has = function (obj, path) {
   return found
 }
 
-has._chainable = true
 has._accepts = [Object, Array]
 has._dependencies = [
   'dash.forEach',

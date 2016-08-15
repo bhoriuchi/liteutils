@@ -11,7 +11,6 @@ let clone = function (obj, deep = false) {
   return obj
 }
 
-clone._chainable = true
 clone._accepts = [Object, Array]
 clone._dependencies = [
   'dash.isArray',

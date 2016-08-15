@@ -11,7 +11,6 @@ let find = function (obj, fn, def) {
   return found
 }
 
-find._chainable = true
 find._accepts = [Object, Array]
 find._dependencies = ['dash.forEach']
 

@@ -12,7 +12,6 @@ let union = function () {
   return [ ...new Set(u) ]
 }
 
-union._chainable = true
 union._accepts = ['ANY']
 union._dependencies = ['dash.isArray']
 

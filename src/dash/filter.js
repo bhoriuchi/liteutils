@@ -10,7 +10,6 @@ let filter = function (obj, fn) {
   return newObj
 }
 
-filter._chainable = true
 filter._accepts = [Array]
 filter._dependencies = [
   'dash.isArray',

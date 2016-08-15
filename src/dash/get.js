@@ -17,7 +17,6 @@ let get = function (obj, path, defaultValue) {
   return value
 }
 
-get._chainable = true
 get._accepts = [Object, Array]
 get._dependencies = [
   'dash.isArray',

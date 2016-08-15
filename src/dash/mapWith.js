@@ -9,7 +9,6 @@ let mapWith = function (obj, fn) {
   return newObj
 }
 
-mapWith._chainable = true
 mapWith._accepts = [Object, Array]
 mapWith._dependencies = ['dash.forEach']
 

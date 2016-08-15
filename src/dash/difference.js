@@ -13,7 +13,6 @@ let difference = function () {
   }, args[0])
 }
 
-difference._chainable = true
 difference._accepts = [Array]
 difference._dependencies = ['dash.isArray']
 

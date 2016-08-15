@@ -13,7 +13,6 @@ let intersection = function () {
   }, args[0])
 }
 
-intersection._chainable = true
 intersection._accepts = [Array]
 intersection._dependencies = ['dash.isArray']
 

@@ -6,7 +6,6 @@ let escapeRegExp = function (str) {
   return (str && reHasRegExpChar.test(str)) ? str.replace(reRegExpChar, '\\$&') : str
 }
 
-escapeRegExp._chainable = false
 escapeRegExp._accepts = [String]
 escapeRegExp._dependencies = []
 

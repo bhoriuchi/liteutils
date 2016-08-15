@@ -3,11 +3,20 @@ import compile from '../src/compile'
 
 let compiledPath = path.resolve(__dirname, '../compiled')
 
-compile([
+let config = {
+  dash: {
+    minify: false,
+    include: ['map', 'keys']
+  }
+}
+
+let oldConfig = [
   { type: 'dash', name: 'map' },
   'dash.keys',
   'dash.keys'
-], compiledPath, { postClean: true }).then(() => {
+]
+
+compile(config, compiledPath, { postClean: false }).then(() => {
   let _ = require(path.resolve(compiledPath, 'litedash.dash'))
   console.log(_.range(10))
 })

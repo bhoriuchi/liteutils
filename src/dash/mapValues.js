@@ -8,7 +8,6 @@ let mapValues = function (obj, fn) {
   return newObj
 }
 
-mapValues._chainable = true
 mapValues._accepts = [Object, Array]
 mapValues._dependencies = ['dash.forEach']
 

@@ -10,7 +10,6 @@ let pickBy = function (obj, fn) {
   return newObj
 }
 
-pickBy._chainable = true
 pickBy._accepts = [Object]
 pickBy._dependencies = [
   'dash.isHash',
