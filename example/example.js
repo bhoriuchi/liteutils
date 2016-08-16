@@ -10,13 +10,7 @@ let config = {
   }
 }
 
-let oldConfig = [
-  { type: 'dash', name: 'map' },
-  'dash.keys',
-  'dash.keys'
-]
-
-compile(config, compiledPath, { postClean: false }).then(() => {
+compile(config, compiledPath, { postClean: true }).then(() => {
   let _ = require(path.resolve(compiledPath, 'litedash.dash'))
   console.log(_.range(10))
 })

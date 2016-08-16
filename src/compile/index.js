@@ -92,14 +92,14 @@ export default {
 }
 
 // rewrite of compile with more versitile config structure
-function compile1 (config, dir, options = {}) {
+function compile (config, dir, options = {}) {
   let encoding = options.encoding || 'utf8'
 
   return clean(compilePath, '.babelrc').then(() => {
     let libs = _.keys(config)
     return Promise.each(libs, (type) => {
       let libConfig = config[type]
-      let includes = _.map(libConfig.include, (name) => { type, name })
+      let includes = _.map(libConfig.include, (name) => { return { type, name } })
       let deps = resolveDependencies(normalizeConfig(includes))
 
       return Promise.each(deps, (d) => {
@@ -120,12 +120,9 @@ function compile1 (config, dir, options = {}) {
         let modSrc = path.resolve(srcPath, type, 'main.js')
         let modDest = path.resolve(compilePath, `${type}.index.js`)
         return copy(modSrc, modDest, encoding, (data) => {
-          data = data
-            .replace(/(^import.*from\s+'\.\/)(.*)('\s+\/\/\s+Replace\s+with\s+)(.*)(\n)/gm, `$1$4$3\n`)
-            .replace(/'\.\.\//gm, '\'./')
-
-          console.log(data)
           return data
+            .replace(/(^import.*from\s+'\.\/)(.*)('\s+\/\/\s+Replace\s+with\s+)(.*)(\n)/gm, `$1$4'\n`)
+            .replace(/'\.\.\//gm, '\'./')
         })
       }).then(() => {
         let entry = path.resolve(compilePath, `${type}.index.js`)
@@ -151,74 +148,4 @@ function compile1 (config, dir, options = {}) {
   })
 }
 
-
-
-
-
-
-// builds/compiles the package
-function compile (config, dir, options = {}) {
-  // dir = dir || path.resolve(baseDir, './compiled')
-  let encoding = options.encoding || 'utf8'
-  let libsToBuild = []
-  config = resolveDependencies(normalizeConfig(config))
-
-  // clean the build directory and copy all the source files
-  return clean(compilePath, '.babelrc').then(() => {
-    return Promise.each(config, (c) => {
-      libsToBuild = _.union(libsToBuild, [c.type])
-      let srcFile = path.resolve(srcPath, c.type, `${c.name}.js`)
-      let dstFile = path.resolve(compilePath, `${c.type}.${c.name}.js`)
-      return copy(srcFile, dstFile, encoding, (data) => {
-        // prefix import file names with type.
-        // filter out dependencies since not necessary in built lib
-        return data
-          .replace(/(^import.*from\s+'\.\/)(.*)(')/gm, `$1${c.type}.$2$3`)
-          .replace(/^.*\._dependencies.*\n$/gm, '')
-      })
-    })
-  }).then(() => {
-    // build each main library
-    return Promise.each(libsToBuild, (libName) => {
-      let libFile = path.resolve(compilePath, `${libName}.js`)
-      let libData = buildLib(config, libName)
-      return fs.writeFileAsync(libFile, libData, { encoding })
-    })
-  }).then(() => {
-    // build each module library
-    return Promise.each(libsToBuild, (libName) => {
-      let modSrc = path.resolve(srcPath, libName, 'main.js')
-      let modDest = path.resolve(compilePath, `${libName}.index.js`)
-      return copy(modSrc, modDest, encoding, (data) => {
-        return data
-          .replace(/(^import.*from\s+'\.\/)(.*)('\s+\/\/\s+Replace\s+with\s+)(.*)(\n)/gm, `$1$4$3\n`)
-          .replace(/'\.\.\//gm, '\'./')
-      })
-    })
-  }).then(() => {
-    // do rollup builds
-    return Promise.each(libsToBuild, (libName) => {
-      let entryPath = path.resolve(compilePath, `${libName}.index.js`)
-      let destPath = path.resolve(compilePath, `litedash.${libName}.js`)
-      return rollup({
-        entry: entryPath,
-        plugins: [
-          babel(),
-          uglify()
-        ]
-      }).then((bundle) => {
-        return bundle.write({
-          format: 'cjs',
-          dest: destPath
-        })
-      })
-    }).then(() => {
-      if (options.postClean !== false) {
-        let except = _.union(_.map(libsToBuild, (l) => `litedash.${l}.js`), ['.babelrc'])
-        return clean(compilePath, except)
-      }
-    })
-  })
-}
-
-export default compile1
+export default compile
