@@ -1,3 +1,7 @@
-/**
- * Created by bhoriuchi on 8/13/16.
- */
+import addClass from './addClass'
+import each from './each'
+
+export default {
+  addClass,
+  each
+}

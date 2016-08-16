@@ -37,6 +37,8 @@ import union from './union'
 import uniq from './uniq'
 import without from './without'
 
+export { forEach }
+
 export default {
   capitalize,
   circular,

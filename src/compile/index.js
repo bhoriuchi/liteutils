@@ -2,14 +2,16 @@ import path from 'path'
 import FileSystem from 'fs'
 import _ from 'lodash'
 import Promise from 'bluebird'
+import browserify from 'browserify'
 import { rollup } from 'rollup'
 import babel from 'rollup-plugin-babel'
 import uglify from 'rollup-plugin-uglify'
 import dash from '../dash'
+import query from '../query'
 
 let fs = Promise.promisifyAll(FileSystem)
 
-let libs = { dash }
+let libs = { dash, query }
 
 // determine source path during dev or packaged usage
 let baseDir = __dirname.replace(/(.*\/liteutils).*/, '$1')
@@ -45,7 +47,6 @@ export function resolveDependencies (config) {
       let [ type, name ] = u.split('.')
       newConfig.push({ type, name })
       resolved.push(u)
-
       _.forEach(_.get(libs, `${u}._dependencies`, []), (dep) => {
         if (!_.includes(_.union(resolved, unresolved), dep)) {
           unresolved.push(dep)
@@ -94,13 +95,15 @@ export default {
 // rewrite of compile with more versitile config structure
 function compile (config, dir, options = {}) {
   let encoding = options.encoding || 'utf8'
+  let keep = ['.babelrc']
 
   return clean(compilePath, '.babelrc').then(() => {
     let libs = _.keys(config)
     return Promise.each(libs, (type) => {
       let libConfig = config[type]
       let includes = _.map(libConfig.include, (name) => { return { type, name } })
-      let deps = resolveDependencies(normalizeConfig(includes))
+      let nc = normalizeConfig(includes)
+      let deps = resolveDependencies(nc)
 
       return Promise.each(deps, (d) => {
         let srcFile = path.resolve(srcPath, d.type, `${d.name}.js`)
@@ -110,6 +113,7 @@ function compile (config, dir, options = {}) {
           // filter out dependencies since not necessary in built lib
           return data
             .replace(/(^import.*from\s+'\.\/)(.*)(')/gm, `$1${d.type}.$2$3`)
+            .replace(/(^import.* from\s+')(\.)(\.\/.*)(\/)(.*')/gm, '$1$3.$5')
             .replace(/^.*\._dependencies.*\n$/gm, '')
         })
       }).then(() => {
@@ -128,6 +132,8 @@ function compile (config, dir, options = {}) {
         let entry = path.resolve(compilePath, `${type}.index.js`)
         let destPath = path.resolve(compilePath, `litedash.${type}.js`)
         let plugins = [ babel() ]
+        keep.push(`litedash.${type}.js`)
+
         if (libConfig.minify) plugins.push(uglify())
         return rollup({
           entry,
@@ -138,13 +144,27 @@ function compile (config, dir, options = {}) {
             dest: destPath
           })
         })
+      }).then(() => {
+        if (!libConfig.browserify) return
+        let opts = {
+          standalone: libConfig.name
+        }
+        let srcPath = path.resolve(compilePath, `litedash.${type}.js`)
+        let destPath = path.resolve(compilePath, `litedash.${type}.browser.js`)
+        keep.push(`litedash.${type}.browser.js`)
+
+        return new Promise((resolve, reject) => {
+          browserify(srcPath, opts).bundle((err, buff) => {
+            if (err) return reject(err)
+            fs.writeFileAsync(destPath, buff, { encoding }).then(resolve).catch(reject)
+          })
+        })
       })
     }).then(() => {
       if (options.postClean !== false) {
-        let except = _.union(_.map(libs, (l) => `litedash.${l}.js`), ['.babelrc'])
-        return clean(compilePath, except)
+        return clean(compilePath, keep)
       }
-    })
+    }).catch(console.log)
   })
 }
 
