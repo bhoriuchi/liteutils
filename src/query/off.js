@@ -10,7 +10,6 @@ function removeEvent (store, el, event, handler) {
   let toRemove = []
   forEach(store.global, (e) => {
     let off = isFunction(e.off) ? e.off : () => {}
-    console.log({ store, el, event, handler })
     if (e.el === el && ( !event || (e.event === event && (e.handler === handler || !handler))) ) {
       toRemove.push(e)
       off()
@@ -27,6 +26,8 @@ let off = function (events, selector, handler) {
     selector = undefined
   }
 
+  let base = selector ? this.find(selector) : this
+
   if (isString(events)) {
     queue = map(events.split(/\s+/g), (event) => {
       return { event, handler }
@@ -40,11 +41,11 @@ let off = function (events, selector, handler) {
       }))
     })
   } else if (!events) {
-    removeEvent(this.$root.event, this)
+    base.each(function () {
+      removeEvent(base.$root.event, this)
+    })
     return this
   }
-
-  let base = selector ? this.find(selector) : this
 
   base.each(function () {
     forEach(queue, (q) => {
