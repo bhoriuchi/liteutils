@@ -36,7 +36,7 @@
   console.log($_('#liteclick').on('click', function (e) {
     console.log('LITE')
     console.log(e)
-    console.log($_('#liteclick').off('click').$root.event)
+    console.log($_('#liteclick').off().$root.event)
   }))
 
   console.log($('#jqclick').on('click', function (e) {

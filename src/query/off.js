@@ -10,7 +10,8 @@ function removeEvent (store, el, event, handler) {
   let toRemove = []
   forEach(store.global, (e) => {
     let off = isFunction(e.off) ? e.off : () => {}
-    if (e.el === el && ((e.event === event && e.handler === handler) || !event)) {
+    console.log({ store, el, event, handler })
+    if (e.el === el && ( !event || (e.event === event && (e.handler === handler || !handler))) ) {
       toRemove.push(e)
       off()
     }
@@ -39,7 +40,7 @@ let off = function (events, selector, handler) {
       }))
     })
   } else if (!events) {
-    removeEvent(base.$root.event, this)
+    removeEvent(this.$root.event, this)
     return this
   }
 
