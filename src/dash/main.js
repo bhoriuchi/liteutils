@@ -1,4 +1,4 @@
-import _dash from './index' // Replace with dash
+import _dash from './index'
 
 let DashChain = function (obj) {
   this._value = obj

@@ -1,33 +1,19 @@
-import _query from './index' // Replace with query
+import _query from './index'
+import mapNodes from '../query/mapNodes'
+import forEach from '../dash/forEach'
+
+let infoName = 'liteutils'
+let infoVersion = '0.1.0'
 
 let arr = []
 
-let forEach = function (obj, fn) {
-  if (Array.isArray(obj)) {
-    let idx = 0
-    for (let val of obj) {
-      if (fn(val, idx) === false) break
-      idx++
-    }
-  } else {
-    for (const key in obj) {
-      if (fn(obj[key], key) === false) break
-    }
-  }
-}
-
-function mapNodes (element, selector) {
-  let obj = []
-  forEach(element.querySelectorAll(selector), (v) => {
-    if (typeof v === 'object') obj.push(v)
-  })
-  return obj
-}
-
 let lQuery = function (selector, context) {
+  context = context || document
+  if (selector !== document) this.prevObject = context instanceof lQuery ? context : new query.fn.init(context)
   let nodes = []
-  if (selector instanceof lQuery) nodes = selector
-  else if (typeof selector === 'string') nodes = mapNodes(context || document, selector)
+  if (Array.isArray(selector)) nodes = selector
+  else if (selector instanceof lQuery) nodes = selector.slice(0, nodes.length)
+  else if (typeof selector === 'string') nodes = mapNodes(context, selector)
   else nodes = [ selector ]
   this.length = nodes.length
   forEach(nodes, (node, idx) => {
@@ -41,30 +27,44 @@ let query = function (selector, context) {
 
 query.fn = {
   init: function (selector, context) {
-    console.log('initing')
-    forEach(query.fn, (v, k) => {
-      lQuery.prototype[k] = v
-    })
+    lQuery.prototype = query.fn
     return new lQuery(selector, context)
-  },
-  find: function (selector) {
-    let results = []
+  }
+}
+
+query.event = {
+  global: []
+}
+
+query.Event = class Event {
+  constructor (event, data) {
+    forEach(event, (v, k) => {
+      if (!k.match(/^[A-Z_]*$/)) this[k] = v
+    })
+    this.originalEvent = event
+    if (data) this.data = data
   }
 }
 
 forEach(_query, (fn, name) => {
   if (fn._baseutil === true) query[name] = fn
-  if (fn._chainable !== false) {
-    query.fn[name] = function () {
-      let args = [this.slice(0, this.length)].concat([ ...arguments ])
-      let result = fn.apply(this, args)
-      return fn._terminates == true ? result : this
-    }
-  }
-  query.fn.splice = arr.splice
-  query.fn.slice = arr.slice
-  query.fn.pop = arr.pop
-  query.fn.push = arr.push
+  if (fn._chainable !== false) query.fn[name] = fn
 })
+
+// extend array and iterator properties
+query.fn.splice = arr.splice
+query.fn.slice = arr.slice
+query.fn.sort = arr.sort
+query.fn.push = arr.push
+query.fn.length = 0
+query.fn[infoName] = infoVersion
+query.fn.$root = query
+
+query.fn[Symbol.iterator] = function values () {
+  let nextIndex = 0
+  return {
+    next: () => nextIndex < this.length ? { value: this[nextIndex++], done: false } : { done: true }
+  }
+}
 
 export default query

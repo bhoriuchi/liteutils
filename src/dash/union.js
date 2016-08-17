@@ -4,12 +4,17 @@ let union = function () {
   let args = [ ...arguments ]
   if (!args.length) return []
 
-  let u = args.reduce((prev, cur) => {
-    if (!isArray(prev) || !isArray(cur)) return []
-    return [ ...prev ].concat([ ...cur ])
-  }, [])
+  try {
+    let u = args.reduce((prev, cur) => {
+      if (!isArray(prev) || !isArray(cur)) return []
+      return prev.concat(cur)
+    }, [])
 
-  return [ ...new Set(u) ]
+    return [ ...new Set(u) ]
+  } catch (err) {
+    console.error(err)
+    return []
+  }
 }
 
 union._accepts = ['ANY']

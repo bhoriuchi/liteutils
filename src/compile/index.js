@@ -8,6 +8,7 @@ import babel from 'rollup-plugin-babel'
 import uglify from 'rollup-plugin-uglify'
 import dash from '../dash'
 import query from '../query'
+import pkg from '../../package.json'
 
 let fs = Promise.promisifyAll(FileSystem)
 
@@ -78,7 +79,7 @@ export function buildLib (config, type) {
   let [ _imports, _exports, _returns ] = [ [], [], [] ]
   _.forEach(config, (c) => {
     if (c.type === type) {
-      _imports.push(`import ${c.name} from './${c.type}.${c.name}.js'`)
+      _imports.push(`import ${c.name} from './${c.type}.${c.name}'`)
       _exports.push(`export { ${c.name} }`)
       _returns.push(`${c.name}`)
     }
@@ -98,10 +99,10 @@ function compile (config, dir, options = {}) {
   let keep = ['.babelrc']
 
   return clean(compilePath, '.babelrc').then(() => {
-    let libs = _.keys(config)
-    return Promise.each(libs, (type) => {
+    return Promise.each(_.keys(config), (type) => {
       let libConfig = config[type]
       let includes = _.map(libConfig.include, (name) => { return { type, name } })
+      includes = _.union(includes, _.get(libs, `${type}._dependencies`, []))
       let nc = normalizeConfig(includes)
       let deps = resolveDependencies(nc)
 
@@ -125,8 +126,11 @@ function compile (config, dir, options = {}) {
         let modDest = path.resolve(compilePath, `${type}.index.js`)
         return copy(modSrc, modDest, encoding, (data) => {
           return data
-            .replace(/(^import.*from\s+'\.\/)(.*)('\s+\/\/\s+Replace\s+with\s+)(.*)(\n)/gm, `$1$4'\n`)
+            .replace(/(^import\s+)(_)(.*)(\s+from\s+'\.\/)(index)(')/gm, '$1$2$3$4$3$6')
+            .replace(/(^import.* from\s+')(\.)(\.\/.*)(\/)(.*')/gm, '$1$3.$5')
             .replace(/'\.\.\//gm, '\'./')
+            .replace(/(^let\s+infoName\s+=\s+')(.*)(')/gm, `$1${pkg.name || 'liteutils'}$3`)
+            .replace(/(^let\s+infoVersion\s+=\s+')(.*)(')/gm, `$1${pkg.version || '0.0.1'}$3`)
         })
       }).then(() => {
         let entry = path.resolve(compilePath, `${type}.index.js`)

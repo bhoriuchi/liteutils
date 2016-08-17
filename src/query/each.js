@@ -1,7 +1,7 @@
 import forEach from '../dash/forEach'
 
-let each = function (elements = [], fn) {
-  forEach(elements, (v, k) => fn.bind(v)(k, v))
+let each = function (fn) {
+  forEach(this.slice(0, this.length), (v, k) => fn.bind(v)(k, v))
 }
 
 each._baseutil = true

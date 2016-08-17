@@ -14,11 +14,11 @@ let config = {
     minify: false,
     browserify: true,
     name: '$_',
-    include: ['each', 'addClass']
+    include: ['find', 'addClass', 'on', 'off']
   }
 }
 
-compile(config, compiledPath, { postClean: true }).then(() => {
+compile(config, compiledPath, { postClean: false }).then(() => {
   // let _ = require(path.resolve(compiledPath, 'litedash.dash'))
   // console.log(_.range(10))
   console.log('done')

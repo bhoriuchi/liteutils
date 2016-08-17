@@ -1,14 +1,22 @@
-import each from './each'
+import forEach from '../dash/forEach'
 
-let addClass = function (elements = [], className) {
+let addClass = function (className) {
   let classList = Array.isArray(className) ? className : className.split(/\s+/)
-  each(elements, function (i, el) {
+  this.each(function (i, el) {
+    forEach(classList, (clazz) => el.classList.add(clazz))
+  })
+  /*
+  each(this, function (i, el) {
     each(classList, function (j, clazz) {
       el.classList.add(clazz)
     })
   })
+  */
 }
 
-addClass._dependencies = ['query.each']
+addClass._dependencies = [
+  'query.each',
+  'dash.forEach'
+]
 
 export default addClass

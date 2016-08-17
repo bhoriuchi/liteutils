@@ -1,3 +1,19 @@
-/**
- * Created by 00u8983 on 8/16/16.
- */
+import mapNodes from './mapNodes'
+import union from '../dash/union'
+
+let find = function (selector) {
+  let results = []
+  this.each(function () {
+    results = union(results, mapNodes(this, selector))
+  })
+  return this.init(results, this)
+}
+
+find._terminates = true
+find._dependencies = [
+  'query.mapNodes',
+  'query.each',
+  'dash.union'
+]
+
+export default find

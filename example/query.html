@@ -1,34 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Query Test</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-    <script src="../compiled/litedash.query.browser.js"></script>
+  <meta charset="UTF-8">
+  <title>Query Test</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script src="../compiled/litedash.query.browser.js"></script>
 </head>
 <body>
-    <div id="app">
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>id</th>
-                <th>name</th>
-            </tr>
-            </thead>
-            <tbody id="tbody">
-                <tr>
-                    <td>1</td>
-                    <td>John</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <script>
-        console.log($_('.table-striped.table'))
-        // console.log($_)
-        console.log($('table'))
-        // console.log($)
-    </script>
+<div id="app">
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>id</th>
+      <th>name</th>
+    </tr>
+    </thead>
+    <tbody id="tbody">
+    <tr>
+      <td>1</td>
+      <td>John</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<div style="width: 100px; height: 100px; background-color: red;" id="jqclick">jQuery</div>
+<div style="width: 100px; height: 100px; background-color: blue;" id="liteclick">lite</div>
+<script>
+  console.log($_('table').find('tr'))
+  // console.log($_)
+  console.log($('table').find('tr'))
+  // console.log($)
+  // console.log($_('table')[0] === $('table')[0])
+
+  console.log($_('#liteclick').on('click', function (e) {
+    console.log('LITE')
+    console.log(e)
+    console.log($_('#liteclick').off('click').$root.event)
+  }))
+
+  console.log($('#jqclick').on('click', function (e) {
+    console.log('JQ')
+    console.log(e)
+  }))
+</script>
 </body>
 </html>
