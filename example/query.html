@@ -24,8 +24,8 @@
     </tbody>
   </table>
 </div>
-<div style="width: 100px; height: 100px; background-color: red;" id="jqclick">jQuery</div>
-<div style="width: 100px; height: 100px; background-color: blue;" id="liteclick">lite</div>
+<div style="width: 100px; height: 100px; background-color: #ff8d8b; padding: 10px;" id="jqclick">jQuery</div>
+<div style="width: 100px; height: 100px; background-color: lightgray; padding: 10px;" id="liteclick">liteutils</div>
 <script>
   console.log($_('table').find('tr'))
   // console.log($_)
@@ -36,12 +36,14 @@
   console.log($_('#liteclick').on('click', function (e) {
     console.log('LITE')
     console.log(e)
-    console.log($_('#liteclick').off().$root.event)
+    console.log(this)
+    console.log($_(this).off(e))
   }))
 
-  console.log($('#jqclick').on('click', function (e) {
+  console.log($('table').find('td').on('click', function (e) {
     console.log('JQ')
     console.log(e)
+    console.log('this', this)
   }))
 </script>
 </body>

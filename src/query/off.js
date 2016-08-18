@@ -6,16 +6,22 @@ import union from '../dash/union'
 import without from '../dash/without'
 import map from '../dash/map'
 
-function removeEvent (store, el, event, handler) {
+function removeEvent (store, el, event, handler, uuid) {
   let toRemove = []
-  forEach(store.global, (e) => {
-    let off = isFunction(e.off) ? e.off : () => {}
-    if (e.el === el && ( !event || (e.event === event && (e.handler === handler || !handler))) ) {
+  let [ evt, ns ] = event.split(/\.(.+)?/)
+  forEach(store.active, (e) => {
+    let isElement = e.el === el
+    let isNS = e.ns === ns || !e.ns && !ns
+    let isEvent = e.event === event && isNS
+    let isHandler = e.handler === handler
+    let foundUUID = uuid === e.uuid
+    let foundEvent = isElement && (!event || (isEvent && (isHandler || !handler)))
+    if (foundUUID || foundEvent) {
       toRemove.push(e)
-      off()
+      if (isFunction(e.off)) e.off()
     }
   })
-  store.global = without.apply(this, [store.global].concat(toRemove))
+  store.active = without.apply(this, [store.active].concat(toRemove))
 }
 
 let off = function (events, selector, handler) {
@@ -33,7 +39,7 @@ let off = function (events, selector, handler) {
       return { event, handler }
     })
   } else if (events instanceof this.$root.Event) {
-    queue = [ { event: events.type, handler } ]
+    queue = [ { uuid: events.handlerId } ]
   } else if (isHash(events)) {
     forEach(events, (h, e) => {
       queue = union(queue, map(e.split(/\s+/g), (event) => {
@@ -48,9 +54,7 @@ let off = function (events, selector, handler) {
   }
 
   base.each(function () {
-    forEach(queue, (q) => {
-      removeEvent(base.$root.event, this, q.event, q.handler)
-    })
+    forEach(queue, (q) => removeEvent(base.$root.event, this, q.event, q.handler, q.uuid))
   })
 
   return this

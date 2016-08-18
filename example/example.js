@@ -14,7 +14,7 @@ let config = {
     minify: false,
     browserify: true,
     name: '$_',
-    include: ['find', 'addClass', 'on', 'off']
+    include: ['find', 'addClass', 'on', 'off', 'one']
   }
 }
 

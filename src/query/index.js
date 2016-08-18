@@ -4,6 +4,8 @@ import find from './find'
 import mapNodes from './mapNodes'
 import off from './off'
 import on from './on'
+import one from './one'
+import onEvent from './onEvent'
 
 export default {
   _dependencies: [
@@ -15,5 +17,7 @@ export default {
   find,
   mapNodes,
   off,
-  on
+  on,
+  one,
+  onEvent
 }

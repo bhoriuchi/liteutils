@@ -33,15 +33,20 @@ query.fn = {
 }
 
 query.event = {
-  global: []
+  active: []
+}
+
+query.uuid = () => {
+  return `${infoName}${Date.now()}`
 }
 
 query.Event = class Event {
-  constructor (event, data) {
+  constructor (event, data, uuid) {
     forEach(event, (v, k) => {
       if (!k.match(/^[A-Z_]*$/)) this[k] = v
     })
     this.originalEvent = event
+    this.handlerId = uuid
     if (data) this.data = data
   }
 }
