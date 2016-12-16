@@ -6,10 +6,10 @@ import browserify from 'browserify'
 import { rollup } from 'rollup'
 import babel from 'rollup-plugin-babel'
 import uglify from 'rollup-plugin-uglify'
-import dash from '../dash'
-import query from '../query'
-import pkg from '../../package.json'
-
+import dash from '../dash/index'
+import query from '../query/index'
+// import pkg from '../../package.json'
+let pkg = { name: 'liteutils', version: '0.1.0' }
 let fs = Promise.promisifyAll(FileSystem)
 
 let libs = { dash, query }
@@ -21,7 +21,7 @@ let buildPath = path.resolve(baseDir, './build')
 let compilePath = path.resolve(baseDir, './compiled')
 
 // copies a file
-export default function copy (src, dest, encoding = 'utf8', modifier) {
+export function copy (src, dest, encoding = 'utf8', modifier) {
   return fs.readFileAsync(src, { encoding }).then((data) => {
     data = _.isFunction(modifier) ? modifier(data) : data
     return fs.writeFileAsync(dest, data, { encoding })
@@ -29,7 +29,7 @@ export default function copy (src, dest, encoding = 'utf8', modifier) {
 }
 
 // cleans the target directory before build/compile
-export default function clean (dir, except = []) {
+export function clean (dir, except = []) {
   except = Array.isArray(except) ? except : [except]
   return fs.readdirAsync(dir).then((files) => {
     return Promise.each(files, (file) => {
