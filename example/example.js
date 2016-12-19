@@ -10,11 +10,50 @@ let config = {
     include: ['map', 'keys']
   },
   */
+  /*
   query: {
     minify: false,
     browserify: true,
     name: '$_',
     include: ['find', 'addClass', 'on', 'off', 'one']
+  }
+  */
+  dash: {
+    minify: false,
+    include: [
+      'circular',
+      'contains',
+      'ensureArray',
+      'filter',
+      'find',
+      'forEach',
+      'get',
+      'has',
+      'includes',
+      'intersection',
+      'isArray',
+      'isBoolean',
+      'isData',
+      'isFunction',
+      'isHash',
+      'isNumber',
+      'isObject',
+      'isPromise',
+      'isString',
+      'keys',
+      'map',
+      'mapValues',
+      'mapWith',
+      'omitBy',
+      'pickBy',
+      'pretty',
+      'range',
+      'set',
+      'stringify',
+      'union',
+      'uniq',
+      'without'
+    ]
   }
 }
 

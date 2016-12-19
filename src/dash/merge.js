@@ -1,10 +1,29 @@
-import isArray from './isArray'
+// import isArray from './isArray'
 import isHash from './isHash'
-import isDate from './isDate'
+// import isDate from './isDate'
 import forEach from './forEach'
 import includes from './includes'
-import clone from './clone'
+// import clone from './clone'
 
+// modified from http://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge
+function mergeDeep(target, source, seen = []) {
+  if (includes(seen, source) || includes(seen, source)) return target
+  seen = seen.concat([target, source])
+
+  if (isHash(target) && isHash(source)) {
+    for (const key in source) {
+      if (isHash(source[key])) {
+        if (!target[key]) Object.assign(target, { [key]: {} })
+        mergeDeep(target[key], source[key], seen.slice())
+      } else {
+        Object.assign(target, { [key]: source[key] })
+      }
+    }
+  }
+  return target
+}
+
+/*
 function _arrayMerge (target, source, seen) {
   forEach(source, (val, i) => {
     if (isArray(val) && !isArray(target[i])) target[i] = val
@@ -28,6 +47,7 @@ function _merge (target, source, seen = []) {
   })
   return target
 }
+*/
 
 let merge = function () {
   let args = [ ...arguments ]
@@ -40,19 +60,16 @@ let merge = function () {
   let sources = args.slice(1)
 
   forEach(sources, (source) => {
-    if (isHash(source)) _merge(target, source)
+    if (isHash(source)) mergeDeep(target, source)
   })
   return target
 }
 
 merge._accepts = [Object]
 merge._dependencies = [
-  'dash.isArray',
   'dash.isHash',
-  'dash.isDate',
   'dash.forEach',
-  'dash.includes',
-  'dash.clone'
+  'dash.includes'
 ]
 
 export default merge
