@@ -3,7 +3,6 @@ example
 node_modules
 test
 dist
-.babelrc
 .DS_Store
 .idea
 npm-debug.log
