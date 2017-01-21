@@ -1023,7 +1023,8 @@ var LiteutilsCompiler = function () {
             include = _config$type.include,
             dest = _config$type.dest,
             encoding = _config$type.encoding,
-            postClean = _config$type.postClean;
+            postClean = _config$type.postClean,
+            eslint = _config$type.eslint;
 
         encoding = encoding || 'utf8';
         compilePath = compileDir ? path.resolve(compileDir) : compilePath;
@@ -1050,7 +1051,8 @@ var LiteutilsCompiler = function () {
 
             // copy the source to dest and update the imports
             return copy(srcFile, dstFile, encoding, function (data) {
-              return data.replace(/(^import.*from\s+'\.\/)(.*)(')/gm, '$1' + dep.type + '.$2$3').replace(/(^import.* from\s+')(\.)(\.\/.*)(\/)(.*')/gm, '$1$3.$5').replace(/^.*\._dependencies.*\n$/gm, '');
+              data = eslint === false ? '/* eslint-disable */\n' + data : data;
+              return data.replace(/(^import.*from\s+'\.\/)(.*)(')/gm, '$1' + dep.type + '.$2$3').replace(/(^import.* from\s+')(\.)(\.\/.*)(\/)(.*')/gm, '$1$3.$5').replace(/^.*\._dependencies.*\n$/gm, '') + '\n';
             });
           })
           // create the lib entry file
@@ -1064,7 +1066,8 @@ var LiteutilsCompiler = function () {
             var modSrc = path.resolve(srcPath, type, 'main.js');
             var modDest = path.resolve(compilePath, type + '.index.js');
             return copy(modSrc, modDest, encoding, function (data) {
-              return data.replace(/(^import\s+)(_)(.*)(\s+from\s+'\.\/)(index)(')/gm, '$1$2$3$4$3$6').replace(/(^import.* from\s+')(\.)(\.\/.*)(\/)(.*')/gm, '$1$3.$5').replace(/'\.\.\//gm, '\'./').replace(/(^let\s+infoName\s+=\s+')(.*)(')/gm, '$1' + (pkg.name || 'liteutils') + '$3').replace(/(^let\s+infoVersion\s+=\s+')(.*)(')/gm, '$1' + (pkg.version || '0.0.1') + '$3');
+              data = eslint === false ? '/* eslint-disable */\n' + data : data;
+              return data.replace(/(^import\s+)(_)(.*)(\s+from\s+'\.\/)(index)(')/gm, '$1$2$3$4$3$6').replace(/(^import.* from\s+')(\.)(\.\/.*)(\/)(.*')/gm, '$1$3.$5').replace(/'\.\.\//gm, '\'./').replace(/(^let\s+infoName\s+=\s+')(.*)(')/gm, '$1' + (pkg.name || 'liteutils') + '$3').replace(/(^let\s+infoVersion\s+=\s+')(.*)(')/gm, '$1' + (pkg.version || '0.0.1') + '$3') + '\n';
             });
           })
           // now compile the module

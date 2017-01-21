@@ -32,7 +32,7 @@ class LiteutilsCompiler {
 
   compile () {
     return Promise.each(_.keys(this.config), (type) => {
-      let { compileDir, minify, browserify, name, include, dest, encoding, postClean } = this.config[type]
+      let { compileDir, minify, browserify, name, include, dest, encoding, postClean, eslint } = this.config[type]
       encoding = encoding || 'utf8'
       compilePath = compileDir ? path.resolve(compileDir) : compilePath
 
@@ -61,10 +61,11 @@ class LiteutilsCompiler {
 
             // copy the source to dest and update the imports
             return copy(srcFile, dstFile, encoding, (data) => {
+              data = eslint === false ? `/* eslint-disable */\n${data}` : data
               return data
                 .replace(/(^import.*from\s+'\.\/)(.*)(')/gm, `$1${dep.type}.$2$3`)
                 .replace(/(^import.* from\s+')(\.)(\.\/.*)(\/)(.*')/gm, '$1$3.$5')
-                .replace(/^.*\._dependencies.*\n$/gm, '')
+                .replace(/^.*\._dependencies.*\n$/gm, '') + '\n'
             })
           })
           // create the lib entry file
@@ -78,12 +79,13 @@ class LiteutilsCompiler {
               let modSrc = path.resolve(srcPath, type, 'main.js')
               let modDest = path.resolve(compilePath, `${type}.index.js`)
               return copy(modSrc, modDest, encoding, (data) => {
+                data = eslint === false ? `/* eslint-disable */\n${data}` : data
                 return data
                   .replace(/(^import\s+)(_)(.*)(\s+from\s+'\.\/)(index)(')/gm, '$1$2$3$4$3$6')
                   .replace(/(^import.* from\s+')(\.)(\.\/.*)(\/)(.*')/gm, '$1$3.$5')
                   .replace(/'\.\.\//gm, '\'./')
                   .replace(/(^let\s+infoName\s+=\s+')(.*)(')/gm, `$1${pkg.name || 'liteutils'}$3`)
-                  .replace(/(^let\s+infoVersion\s+=\s+')(.*)(')/gm, `$1${pkg.version || '0.0.1'}$3`)
+                  .replace(/(^let\s+infoVersion\s+=\s+')(.*)(')/gm, `$1${pkg.version || '0.0.1'}$3`) + '\n'
               })
             })
             // now compile the module
