@@ -1105,11 +1105,6 @@ var LiteutilsCompiler = function () {
               });
             });
           })
-          // remove babelrc files
-          .then(function () {
-            if (babelrc === false) return fs.unlinkAsync(path.resolve(compilePath, '.babelrc'));
-            return true;
-          })
           // optional cleanup
           .then(function () {
             if (postClean) return fs.emptyDirAsync(compilePath);

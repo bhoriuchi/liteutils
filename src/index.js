@@ -133,11 +133,6 @@ class LiteutilsCompiler {
                 })
               })
             })
-            // remove babelrc files
-            .then(() => {
-              if (babelrc === false) return fs.unlinkAsync(path.resolve(compilePath, '.babelrc'))
-              return true
-            })
             // optional cleanup
             .then(() => {
               if (postClean) return fs.emptyDirAsync(compilePath)
