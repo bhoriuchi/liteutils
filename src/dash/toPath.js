@@ -15,6 +15,6 @@ let toPath = function (pathString) {
 }
 
 toPath._accepts = [String]
-toPath._dependencies = ['isString']
+toPath._dependencies = ['dash.isString']
 
 export default toPath

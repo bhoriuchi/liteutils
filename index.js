@@ -434,7 +434,7 @@ var toPath = function toPath(pathString) {
 };
 
 toPath._accepts = [String];
-toPath._dependencies = ['isString'];
+toPath._dependencies = ['dash.isString'];
 
 var get$1 = function get(obj, path$$1, defaultValue) {
   var value = obj;
@@ -1104,6 +1104,11 @@ var LiteutilsCompiler = function () {
                 return fs.writeFileAsync(destPath, buff, { encoding: encoding }).then(resolve, reject);
               });
             });
+          })
+          // remove babelrc files
+          .then(function () {
+            if (babelrc === false) return fs.unlinkAsync(path.resolve(compilePath, './.babelrc'));
+            return true;
           })
           // optional cleanup
           .then(function () {
