@@ -1,10 +1,10 @@
 import forEach from './forEach'
 import isArray from './isArray'
-import stringToPathArray from './stringToPathArray'
+import toPath from './toPath'
 
 let has = function (obj, path) {
   let found = true
-  let fields = isArray(path) ? path : stringToPathArray(path)
+  let fields = isArray(path) ? path : toPath(path)
   if (!fields.length) return false
   forEach(fields, (field) => {
     if (obj[field] === undefined) {
@@ -20,7 +20,7 @@ has._accepts = [Object, Array]
 has._dependencies = [
   'dash.forEach',
   'dash.isArray',
-  'dash.stringToPathArray'
+  'dash.toPath'
 ]
 
 export default has

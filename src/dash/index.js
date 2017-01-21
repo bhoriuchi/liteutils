@@ -32,7 +32,7 @@ import pretty from './pretty'
 import range from './range'
 import set from './set'
 import stringify from './stringify'
-import stringToPathArray from './stringToPathArray'
+import toPath from './toPath'
 import union from './union'
 import uniq from './uniq'
 import without from './without'
@@ -74,7 +74,7 @@ export default {
   range,
   set,
   stringify,
-  stringToPathArray,
+  toPath,
   union,
   uniq,
   without

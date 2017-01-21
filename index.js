@@ -10,15 +10,15 @@ var rollup = require('rollup');
 var babel = _interopDefault(require('rollup-plugin-babel'));
 var uglify = _interopDefault(require('rollup-plugin-uglify'));
 
-var isString$1 = function isString(obj) {
+var isString = function isString(obj) {
   return typeof obj === 'string';
 };
 
-isString$1._accepts = ['ANY'];
-isString$1._dependencies = [];
+isString._accepts = ['ANY'];
+isString._dependencies = [];
 
 var capitalize = function capitalize(str) {
-  return isString$1(str) && str.length ? '' + str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : str;
+  return isString(str) && str.length ? '' + str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : str;
 };
 
 capitalize._accepts = [String];
@@ -419,7 +419,7 @@ var filter = function filter(obj, fn) {
 filter._accepts = [Array];
 filter._dependencies = ['dash.isArray', 'dash.forEach'];
 
-var stringToPathArray = function stringToPathArray(pathString) {
+var toPath = function toPath(pathString) {
   // taken from lodash - https://github.com/lodash/lodash
   var pathRx = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(\.|\[\])(?:\4|$))/g;
   var pathArray = [];
@@ -433,12 +433,12 @@ var stringToPathArray = function stringToPathArray(pathString) {
   return pathArray;
 };
 
-stringToPathArray._accepts = [String];
-stringToPathArray._dependencies = [];
+toPath._accepts = [String];
+toPath._dependencies = ['isString'];
 
 var get$1 = function get(obj, path$$1, defaultValue) {
   var value = obj;
-  var fields = isArray(path$$1) ? path$$1 : stringToPathArray(path$$1);
+  var fields = isArray(path$$1) ? path$$1 : toPath(path$$1);
   if (fields.length === 0) return defaultValue;
 
   try {
@@ -452,11 +452,11 @@ var get$1 = function get(obj, path$$1, defaultValue) {
 };
 
 get$1._accepts = [Object, Array];
-get$1._dependencies = ['dash.isArray', 'dash.stringToPathArray'];
+get$1._dependencies = ['dash.isArray', 'dash.toPath'];
 
 var has = function has(obj, path$$1) {
   var found = true;
-  var fields = isArray(path$$1) ? path$$1 : stringToPathArray(path$$1);
+  var fields = isArray(path$$1) ? path$$1 : toPath(path$$1);
   if (!fields.length) return false;
   forEach(fields, function (field) {
     if (obj[field] === undefined) {
@@ -469,7 +469,7 @@ var has = function has(obj, path$$1) {
 };
 
 has._accepts = [Object, Array];
-has._dependencies = ['dash.forEach', 'dash.isArray', 'dash.stringToPathArray'];
+has._dependencies = ['dash.forEach', 'dash.isArray', 'dash.toPath'];
 
 var intersection = function intersection() {
   var args = [].concat(Array.prototype.slice.call(arguments));
@@ -595,7 +595,7 @@ pretty._accepts = [Object, Array, Date];
 pretty._dependencies = [];
 
 var set$1 = function set(obj, path$$1, val) {
-  var fields = isArray(path$$1) ? path$$1 : stringToPathArray(path$$1);
+  var fields = isArray(path$$1) ? path$$1 : toPath(path$$1);
 
   forEach(fields, function (field, idx) {
     if (idx === fields.length - 1) obj[field] = val;else if (!obj[field]) obj[field] = isNumber(field) ? [] : {};
@@ -604,7 +604,7 @@ var set$1 = function set(obj, path$$1, val) {
 };
 
 set$1._accepts = [Object, Array];
-set$1._dependencies = ['dash.isArray', 'dash.isNumber', 'dash.stringToPathArray', 'dash.forEach'];
+set$1._dependencies = ['dash.isArray', 'dash.isNumber', 'dash.toPath', 'dash.forEach'];
 
 var stringify = function stringify(obj) {
   try {
@@ -681,7 +681,7 @@ var dash = {
   isNumber: isNumber,
   isObject: isObject,
   isPromise: isPromise,
-  isString: isString$1,
+  isString: isString,
   keys: keys,
   map: map,
   mapValues: mapValues,
@@ -693,7 +693,7 @@ var dash = {
   range: range,
   set: set$1,
   stringify: stringify,
-  stringToPathArray: stringToPathArray,
+  toPath: toPath,
   union: union,
   uniq: uniq,
   without: without
@@ -733,7 +733,7 @@ function getAttrs(node) {
     name = name || nodeName || localName;
     value = value || nodeValue || textContent;
 
-    if (isString$1(name) && name.match(rx)) {
+    if (isString(name) && name.match(rx)) {
       obj[name.replace(rx, '$1')] = value;
     }
   });
@@ -776,7 +776,7 @@ var data = function data(key, val) {
   } else if (!key) {
     return getAttrs(node);
   } else if (key && val === undefined) {
-    if (isString$1(key)) {
+    if (isString(key)) {
       return getAttrs(node)[key];
     } else if (isObject(key)) {
       return forEach(key, function (v, k) {
@@ -853,7 +853,7 @@ var off = function off(events, selector, handler) {
 
   var base = selector ? this.find(selector) : this;
 
-  if (isString$1(events)) {
+  if (isString(events)) {
     queue = map(events.split(/\s+/g), function (event) {
       return { event: event, handler: handler };
     });
@@ -903,7 +903,7 @@ function offHandler(el, event, handler) {
 }
 
 function addEvents(one, events, selector, data, fn) {
-  if (!isString$1(selector)) {
+  if (!isString(selector)) {
     fn = data;
     data = selector;
     selector = undefined;
@@ -945,7 +945,7 @@ var onEvent = function onEvent(one, events, selector, data, fn) {
 
   if (isHash(events)) forEach(events, function (h, e) {
     return addEvents.call(_this, one, e, selector, data, h);
-  });else if (isString$1(events)) addEvents.call(this, one, events, selector, data, fn);
+  });else if (isString(events)) addEvents.call(this, one, events, selector, data, fn);
   return this;
 };
 
@@ -1024,7 +1024,9 @@ var LiteutilsCompiler = function () {
             dest = _config$type.dest,
             encoding = _config$type.encoding,
             postClean = _config$type.postClean,
-            eslint = _config$type.eslint;
+            eslint = _config$type.eslint,
+            babelrc = _config$type.babelrc;
+
 
         encoding = encoding || 'utf8';
         compilePath = compileDir ? path.resolve(compileDir) : compilePath;
@@ -1102,6 +1104,11 @@ var LiteutilsCompiler = function () {
                 return fs.writeFileAsync(destPath, buff, { encoding: encoding }).then(resolve, reject);
               });
             });
+          })
+          // remove babelrc files
+          .then(function () {
+            if (babelrc === false) return fs.unlinkAsync(path.resolve(compilePath, '.babelrc'));
+            return true;
           })
           // optional cleanup
           .then(function () {

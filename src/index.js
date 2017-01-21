@@ -32,7 +32,19 @@ class LiteutilsCompiler {
 
   compile () {
     return Promise.each(_.keys(this.config), (type) => {
-      let { compileDir, minify, browserify, name, include, dest, encoding, postClean, eslint } = this.config[type]
+      let {
+        compileDir,
+        minify,
+        browserify,
+        name,
+        include,
+        dest,
+        encoding,
+        postClean,
+        eslint,
+        babelrc
+      } = this.config[type]
+
       encoding = encoding || 'utf8'
       compilePath = compileDir ? path.resolve(compileDir) : compilePath
 
@@ -120,6 +132,11 @@ class LiteutilsCompiler {
                   return fs.writeFileAsync(destPath, buff, { encoding }).then(resolve, reject)
                 })
               })
+            })
+            // remove babelrc files
+            .then(() => {
+              if (babelrc === false) return fs.unlinkAsync(path.resolve(compilePath, '.babelrc'))
+              return true
             })
             // optional cleanup
             .then(() => {

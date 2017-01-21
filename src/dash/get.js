@@ -1,9 +1,9 @@
 import isArray from './isArray'
-import stringToPathArray from './stringToPathArray'
+import toPath from './toPath'
 
 let get = function (obj, path, defaultValue) {
   let value = obj
-  let fields = isArray(path) ? path : stringToPathArray(path)
+  let fields = isArray(path) ? path : toPath(path)
   if (fields.length === 0) return defaultValue
 
   try {
@@ -20,7 +20,7 @@ let get = function (obj, path, defaultValue) {
 get._accepts = [Object, Array]
 get._dependencies = [
   'dash.isArray',
-  'dash.stringToPathArray'
+  'dash.toPath'
 ]
 
 export default get

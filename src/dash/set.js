@@ -1,10 +1,10 @@
 import isArray from './isArray'
 import isNumber from './isNumber'
-import stringToPathArray from './stringToPathArray'
+import toPath from './toPath'
 import forEach from './forEach'
 
 let set = function (obj, path, val) {
-  let fields = isArray(path) ? path : stringToPathArray(path)
+  let fields = isArray(path) ? path : toPath(path)
 
   forEach(fields, (field, idx) => {
     if (idx === fields.length - 1) obj[field] = val
@@ -17,7 +17,7 @@ set._accepts = [Object, Array]
 set._dependencies = [
   'dash.isArray',
   'dash.isNumber',
-  'dash.stringToPathArray',
+  'dash.toPath',
   'dash.forEach'
 ]
 

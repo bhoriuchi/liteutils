@@ -1,4 +1,6 @@
-let stringToPathArray = function (pathString) {
+import isString from './isString'
+
+let toPath = function (pathString) {
   // taken from lodash - https://github.com/lodash/lodash
   let pathRx = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(\.|\[\])(?:\4|$))/g
   let pathArray = []
@@ -12,7 +14,7 @@ let stringToPathArray = function (pathString) {
   return pathArray
 }
 
-stringToPathArray._accepts = [String]
-stringToPathArray._dependencies = []
+toPath._accepts = [String]
+toPath._dependencies = ['isString']
 
-export default stringToPathArray
+export default toPath
