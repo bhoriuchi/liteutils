@@ -510,6 +510,31 @@ var isPromise = function isPromise(obj) {
 isPromise._accepts = ['ANY'];
 isPromise._dependencies = ['dash.isFunction'];
 
+// ported from https://gist.github.com/tdukart/b87afb278c41245741ae7a0c355a0a0b
+var kebabCase = function kebabCase(string) {
+  if (!isString(string)) return '';
+  var result = string;
+
+  // Convert camelCase capitals to kebab-case.
+  result = result.replace(/([a-z][A-Z])/g, function (match) {
+    return match.substr(0, 1) + '-' + match.substr(1, 1).toLowerCase();
+  });
+
+  // Convert non-camelCase capitals to lowercase.
+  result = result.toLowerCase();
+
+  // Convert non-alphanumeric characters to hyphens
+  result = result.replace(/[^-a-z0-9]+/g, '-');
+
+  // Remove hyphens from both ends
+  result = result.replace(/^-+/, '').replace(/-$/, '');
+
+  return result;
+};
+
+kebabCase._accepts = [String];
+kebabCase._dependencies = ['dash.isString'];
+
 var range = function range() {
   var number = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
   var increment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
@@ -616,6 +641,20 @@ var stringify = function stringify(obj) {
 stringify._accepts = ['ANY'];
 stringify._dependencies = ['dash.has', 'dash.isArray', 'dash.isHash'];
 
+var toLower = function toLower(string) {
+  return isString(string) ? string.toLowerCase() : '';
+};
+
+toLower._accepts = [String];
+toLower._dependencies = ['dash.isString'];
+
+var toUpper = function toUpper(string) {
+  return isString(string) ? string.toUpperCase() : '';
+};
+
+toUpper._accepts = [String];
+toUpper._dependencies = ['dash.isString'];
+
 var union = function union() {
   var args = [].concat(Array.prototype.slice.call(arguments));
   if (!args.length) return [];
@@ -682,6 +721,7 @@ var dash = {
   isObject: isObject,
   isPromise: isPromise,
   isString: isString,
+  kebabCase: kebabCase,
   keys: keys,
   map: map,
   mapValues: mapValues,
@@ -693,7 +733,9 @@ var dash = {
   range: range,
   set: set$1,
   stringify: stringify,
+  toLower: toLower,
   toPath: toPath,
+  toUpper: toUpper,
   union: union,
   uniq: uniq,
   without: without

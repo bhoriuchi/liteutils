@@ -21,6 +21,7 @@ import isNumber from './isNumber'
 import isObject from './isObject'
 import isPromise from './isPromise'
 import isString from './isString'
+import kebabCase from './kebabCase'
 import keys from './keys'
 import map from './map'
 import mapValues from './mapValues'
@@ -32,7 +33,9 @@ import pretty from './pretty'
 import range from './range'
 import set from './set'
 import stringify from './stringify'
+import toLower from './toLower'
 import toPath from './toPath'
+import toUpper from './toUpper'
 import union from './union'
 import uniq from './uniq'
 import without from './without'
@@ -63,6 +66,7 @@ export default {
   isObject,
   isPromise,
   isString,
+  kebabCase,
   keys,
   map,
   mapValues,
@@ -74,7 +78,9 @@ export default {
   range,
   set,
   stringify,
+  toLower,
   toPath,
+  toUpper,
   union,
   uniq,
   without
