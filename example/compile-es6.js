@@ -7,7 +7,7 @@ liteutils({
     browserify: true,
     name: '$_',
     dest: path.resolve(__dirname, 'query.js'),
-    postClean: true
+    compileDir: path.resolve(__dirname, 'compiled')
   }
 })
 .then(() => {

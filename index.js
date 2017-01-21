@@ -1014,34 +1014,35 @@ var LiteutilsCompiler = function () {
     value: function compile() {
       var _this = this;
 
-      return fs.emptyDirAsync(compilePath).then(function () {
-        return fs.ensureFileAsync(path.resolve(compilePath, '.babelrc'));
-      }).then(function () {
-        return fs.writeFileAsync(path.resolve(compilePath, '.babelrc'), '{\n  "presets": ["es2015-rollup"]\n}');
-      }).then(function () {
-        return Promise$1.each(_.keys(_this.config), function (type) {
-          var _config$type = _this.config[type],
-              minify = _config$type.minify,
-              browserify = _config$type.browserify,
-              name = _config$type.name,
-              include = _config$type.include,
-              dest = _config$type.dest,
-              encoding = _config$type.encoding,
-              postClean = _config$type.postClean;
+      return Promise$1.each(_.keys(this.config), function (type) {
+        var _config$type = _this.config[type],
+            compileDir = _config$type.compileDir,
+            minify = _config$type.minify,
+            browserify = _config$type.browserify,
+            name = _config$type.name,
+            include = _config$type.include,
+            dest = _config$type.dest,
+            encoding = _config$type.encoding,
+            postClean = _config$type.postClean;
 
-          encoding = encoding || 'utf8';
+        encoding = encoding || 'utf8';
+        compilePath = compileDir ? path.resolve(compileDir) : compilePath;
 
-          if (!_.isString(dest)) throw new Error(type + ' configuration is missing "dest" setting');
+        if (!_.isString(dest)) throw new Error(type + ' configuration is missing "dest" setting');
 
-          // generate a list of includes
-          var includes = _.map(_.isArray(include) ? include : type === 'dash' ? _.without(_.keys(dash), '_dependencies') : _.without(_.keys(query), '_dependencies'), function (name) {
-            return { type: type, name: name };
-          });
-          includes = _.union(includes, _.get(libs, type + '._dependencies', []));
+        // generate a list of includes
+        var includes = _.map(_.isArray(include) ? include : type === 'dash' ? _.without(_.keys(dash), '_dependencies') : _.without(_.keys(query), '_dependencies'), function (name) {
+          return { type: type, name: name };
+        });
+        includes = _.union(includes, _.get(libs, type + '._dependencies', []));
 
-          // resolve the dependencies
-          var deps = _this.resolveDependencies(_this.normalizeConfig(includes));
+        // resolve the dependencies
+        var deps = _this.resolveDependencies(_this.normalizeConfig(includes));
 
+        // clean the dir
+        return fs.emptyDirAsync(compilePath).then(function () {
+          return fs.writeFileAsync(path.resolve(compilePath, '.babelrc'), '{\n  "presets": ["es2015-rollup"]\n}');
+        }).then(function () {
           // create a library
           return Promise$1.each(deps, function (dep) {
             var srcFile = path.resolve(srcPath, dep.type, dep.name + '.js');

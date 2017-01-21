@@ -31,28 +31,29 @@ class LiteutilsCompiler {
   }
 
   compile () {
-    return fs.emptyDirAsync(compilePath)
-      .then(() => fs.ensureFileAsync(path.resolve(compilePath, '.babelrc')))
-      .then(() => fs.writeFileAsync(path.resolve(compilePath, '.babelrc'), '{\n  "presets": ["es2015-rollup"]\n}'))
-      .then(() => {
-        return Promise.each(_.keys(this.config), (type) => {
-          let { minify, browserify, name, include, dest, encoding, postClean } = this.config[type]
-          encoding = encoding || 'utf8'
+    return Promise.each(_.keys(this.config), (type) => {
+      let { compileDir, minify, browserify, name, include, dest, encoding, postClean } = this.config[type]
+      encoding = encoding || 'utf8'
+      compilePath = compileDir ? path.resolve(compileDir) : compilePath
 
-          if (!_.isString(dest)) throw new Error(`${type} configuration is missing "dest" setting`)
+      if (!_.isString(dest)) throw new Error(`${type} configuration is missing "dest" setting`)
 
-          // generate a list of includes
-          let includes = _.map(_.isArray(include)
-              ? include
-              : type === 'dash'
-              ? _.without(_.keys(dash), '_dependencies')
-              : _.without(_.keys(query), '_dependencies'),
-            (name) => { return { type, name } })
-          includes = _.union(includes, _.get(libs, `${type}._dependencies`, []))
+      // generate a list of includes
+      let includes = _.map(_.isArray(include)
+          ? include
+          : type === 'dash'
+          ? _.without(_.keys(dash), '_dependencies')
+          : _.without(_.keys(query), '_dependencies'),
+        (name) => { return { type, name } })
+      includes = _.union(includes, _.get(libs, `${type}._dependencies`, []))
 
-          // resolve the dependencies
-          let deps = this.resolveDependencies(this.normalizeConfig(includes))
+      // resolve the dependencies
+      let deps = this.resolveDependencies(this.normalizeConfig(includes))
 
+      // clean the dir
+      return fs.emptyDirAsync(compilePath)
+        .then(() => fs.writeFileAsync(path.resolve(compilePath, '.babelrc'), '{\n  "presets": ["es2015-rollup"]\n}'))
+        .then(() => {
           // create a library
           return Promise.each(deps, (dep) => {
             let srcFile = path.resolve(srcPath, dep.type, `${dep.name}.js`)
@@ -66,7 +67,7 @@ class LiteutilsCompiler {
                 .replace(/^.*\._dependencies.*\n$/gm, '')
             })
           })
-            // create the lib entry file
+          // create the lib entry file
             .then(() => {
               let libFile = path.resolve(compilePath, `${type}.js`)
               let libData = this.buildLib(deps, type)
@@ -124,7 +125,7 @@ class LiteutilsCompiler {
               return true
             })
         })
-      })
+    })
       .then(() => this.callback(), (error) => this.callback(error))
   }
 
