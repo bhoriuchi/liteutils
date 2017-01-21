@@ -71,7 +71,7 @@ class LiteutilsCompiler {
           // create the lib entry file
             .then(() => {
               let libFile = path.resolve(compilePath, `${type}.js`)
-              let libData = this.buildLib(deps, type)
+              let libData = this.buildLib(deps, type, eslint)
               return fs.writeFileAsync(libFile, libData, { encoding })
             })
             // copy the current main file with some modifications
@@ -166,7 +166,7 @@ class LiteutilsCompiler {
     return newConfig
   }
 
-  buildLib (config, type) {
+  buildLib (config, type, eslint) {
     let [ _imports, _exports, _returns ] = [ [], [], [] ]
     _.forEach(config, (c) => {
       if (c.type === type) {
@@ -175,13 +175,14 @@ class LiteutilsCompiler {
         _returns.push(`${c.name}`)
       }
     })
-    return `${_imports.join('\n')}
+    return `${eslint === false ? '/* eslint-disable */\n' : ''}${_imports.join('\n')}
 
 ${_exports.join('\n')}
 
 export default {
   ${_returns.join(',\n  ')}
-}`
+}
+`
   }
 }
 

@@ -1058,7 +1058,7 @@ var LiteutilsCompiler = function () {
           // create the lib entry file
           .then(function () {
             var libFile = path.resolve(compilePath, type + '.js');
-            var libData = _this.buildLib(deps, type);
+            var libData = _this.buildLib(deps, type, eslint);
             return fs.writeFileAsync(libFile, libData, { encoding: encoding });
           })
           // copy the current main file with some modifications
@@ -1166,7 +1166,7 @@ var LiteutilsCompiler = function () {
     }
   }, {
     key: 'buildLib',
-    value: function buildLib(config, type) {
+    value: function buildLib(config, type, eslint) {
       var _imports = [],
           _exports = [],
           _returns = [];
@@ -1178,7 +1178,7 @@ var LiteutilsCompiler = function () {
           _returns.push('' + c.name);
         }
       });
-      return _imports.join('\n') + '\n\n' + _exports.join('\n') + '\n\nexport default {\n  ' + _returns.join(',\n  ') + '\n}';
+      return '' + (eslint === false ? '/* eslint-disable */\n' : '') + _imports.join('\n') + '\n\n' + _exports.join('\n') + '\n\nexport default {\n  ' + _returns.join(',\n  ') + '\n}\n';
     }
   }]);
   return LiteutilsCompiler;
