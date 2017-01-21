@@ -13,6 +13,7 @@ export default {
     'browserify',
     'bluebird',
     'path',
-    'fs'
+    'fs',
+    'fs-extra'
   ]
 }

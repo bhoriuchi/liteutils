@@ -102,8 +102,8 @@ function compile (config, dir, options = {}) {
     return Promise.each(_.keys(config), (type) => {
       let libConfig = config[type]
       let includes = _.map(Array.isArray(libConfig.include)
-        ? libConfig.include
-        : type === 'dash'
+          ? libConfig.include
+          : type === 'dash'
           ? _.without(_.keys(dash), '_dependencies')
           : _.without(_.keys(query), '_dependencies'),
         (name) => { return { type, name } })

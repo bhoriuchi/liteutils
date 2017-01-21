@@ -2,11 +2,10 @@
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var path = _interopDefault(require('path'));
-var FileSystem = _interopDefault(require('fs'));
 var _ = _interopDefault(require('lodash'));
+var path = _interopDefault(require('path'));
 var Promise$1 = _interopDefault(require('bluebird'));
-var browserify = _interopDefault(require('browserify'));
+var Browserify = _interopDefault(require('browserify'));
 var rollup = require('rollup');
 var babel = _interopDefault(require('rollup-plugin-babel'));
 var uglify = _interopDefault(require('rollup-plugin-uglify'));
@@ -90,9 +89,29 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 
 
+var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
 
+var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
 
-
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
 
 
 
@@ -960,19 +979,14 @@ var query = {
   onEvent: onEvent
 };
 
-// import pkg from '../../package.json'
+var fs = Promise$1.promisifyAll(require('fs-extra'));
 var pkg = { name: 'liteutils', version: '0.1.0' };
-var fs = Promise$1.promisifyAll(FileSystem);
-
-var libs = { dash: dash, query: query };
-
-// determine source path during dev or packaged usage
 var baseDir = __dirname.replace(/(.*\/liteutils).*/, '$1');
 var srcPath = path.resolve(baseDir, './src');
-var buildPath = path.resolve(baseDir, './build');
 var compilePath = path.resolve(baseDir, './compiled');
+var libs = { dash: dash, query: query };
 
-// copies a file
+// copy function that can modify the files contents before writing
 function copy(src, dest) {
   var encoding = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'utf8';
   var modifier = arguments[3];
@@ -983,155 +997,191 @@ function copy(src, dest) {
   });
 }
 
-// cleans the target directory before build/compile
-function clean(dir) {
-  var except = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+var LiteutilsCompiler = function () {
+  function LiteutilsCompiler(config) {
+    var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {
+      return true;
+    };
+    classCallCheck(this, LiteutilsCompiler);
 
-  except = Array.isArray(except) ? except : [except];
-  return fs.readdirAsync(dir).then(function (files) {
-    return Promise$1.each(files, function (file) {
-      if (!_.includes(except, file)) return fs.unlinkAsync(path.resolve(dir, file));
-    });
-  });
-}
+    this.config = config;
+    this.callback = callback;
+    return this.compile();
+  }
 
-// updates the config with the required dependencies
-function resolveDependencies(config) {
-  var newConfig = [];
-  var resolved = [],
-      unresolved = [];
+  createClass(LiteutilsCompiler, [{
+    key: 'compile',
+    value: function compile() {
+      var _this = this;
 
-  unresolved = _.map(config, function (c) {
-    return c.type + '.' + c.name;
-  });
-  while (unresolved.length) {
-    _.forEach(unresolved, function (u) {
-      var _u$split = u.split('.'),
-          _u$split2 = slicedToArray(_u$split, 2),
-          type = _u$split2[0],
-          name = _u$split2[1];
+      return fs.emptyDirAsync(compilePath).then(function () {
+        return fs.ensureFileAsync(path.resolve(compilePath, '.babelrc'));
+      }).then(function () {
+        return fs.writeFileAsync(path.resolve(compilePath, '.babelrc'), '{\n  "presets": ["es2015-rollup"]\n}');
+      }).then(function () {
+        return Promise$1.each(_.keys(_this.config), function (type) {
+          var _config$type = _this.config[type],
+              minify = _config$type.minify,
+              browserify = _config$type.browserify,
+              name = _config$type.name,
+              include = _config$type.include,
+              dest = _config$type.dest,
+              encoding = _config$type.encoding,
+              postClean = _config$type.postClean;
 
-      newConfig.push({ type: type, name: name });
-      resolved.push(u);
-      _.forEach(_.get(libs, u + '._dependencies', []), function (dep) {
-        if (!_.includes(_.union(resolved, unresolved), dep)) {
-          unresolved.push(dep);
+          encoding = encoding || 'utf8';
+
+          if (!_.isString(dest)) throw new Error(type + ' configuration is missing "dest" setting');
+
+          // generate a list of includes
+          var includes = _.map(_.isArray(include) ? include : type === 'dash' ? _.without(_.keys(dash), '_dependencies') : _.without(_.keys(query), '_dependencies'), function (name) {
+            return { type: type, name: name };
+          });
+          includes = _.union(includes, _.get(libs, type + '._dependencies', []));
+
+          // resolve the dependencies
+          var deps = _this.resolveDependencies(_this.normalizeConfig(includes));
+
+          // create a library
+          return Promise$1.each(deps, function (dep) {
+            var srcFile = path.resolve(srcPath, dep.type, dep.name + '.js');
+            var dstFile = path.resolve(compilePath, dep.type + '.' + dep.name + '.js');
+
+            // copy the source to dest and update the imports
+            return copy(srcFile, dstFile, encoding, function (data) {
+              return data.replace(/(^import.*from\s+'\.\/)(.*)(')/gm, '$1' + dep.type + '.$2$3').replace(/(^import.* from\s+')(\.)(\.\/.*)(\/)(.*')/gm, '$1$3.$5').replace(/^.*\._dependencies.*\n$/gm, '');
+            });
+          })
+          // create the lib entry file
+          .then(function () {
+            var libFile = path.resolve(compilePath, type + '.js');
+            var libData = _this.buildLib(deps, type);
+            return fs.writeFileAsync(libFile, libData, { encoding: encoding });
+          })
+          // copy the current main file with some modifications
+          .then(function () {
+            var modSrc = path.resolve(srcPath, type, 'main.js');
+            var modDest = path.resolve(compilePath, type + '.index.js');
+            return copy(modSrc, modDest, encoding, function (data) {
+              return data.replace(/(^import\s+)(_)(.*)(\s+from\s+'\.\/)(index)(')/gm, '$1$2$3$4$3$6').replace(/(^import.* from\s+')(\.)(\.\/.*)(\/)(.*')/gm, '$1$3.$5').replace(/'\.\.\//gm, '\'./').replace(/(^let\s+infoName\s+=\s+')(.*)(')/gm, '$1' + (pkg.name || 'liteutils') + '$3').replace(/(^let\s+infoVersion\s+=\s+')(.*)(')/gm, '$1' + (pkg.version || '0.0.1') + '$3');
+            });
+          })
+          // now compile the module
+          .then(function () {
+            var entry = path.resolve(compilePath, type + '.index.js');
+            var destPath = path.resolve(compilePath, 'litedash.' + type + '.js');
+            var plugins = [babel()];
+
+            if (minify) plugins.push(uglify());
+            return rollup.rollup({
+              entry: entry,
+              plugins: plugins
+            }).then(function (bundle) {
+              return bundle.write({
+                format: 'cjs',
+                dest: destPath
+              });
+            });
+          })
+          // do browserify transform if specified
+          .then(function () {
+            if (!browserify) {
+              return fs.copyAsync(path.resolve(compilePath, 'litedash.' + type + '.js'), path.resolve(dest));
+            }
+            var opts = { standalone: name || type };
+            var srcPath = path.resolve(compilePath, 'litedash.' + type + '.js');
+            var destPath = path.resolve(dest);
+
+            return new Promise$1(function (resolve, reject) {
+              Browserify(srcPath, opts).bundle(function (err, buff) {
+                if (err) return reject(err);
+                return fs.writeFileAsync(destPath, buff, { encoding: encoding }).then(resolve, reject);
+              });
+            });
+          })
+          // optional cleanup
+          .then(function () {
+            if (postClean) return fs.emptyDirAsync(compilePath);
+            return true;
+          });
+        });
+      }).then(function () {
+        return _this.callback();
+      }, function (error) {
+        return _this.callback(error);
+      });
+    }
+  }, {
+    key: 'normalizeConfig',
+    value: function normalizeConfig(config) {
+      var added = [];
+      return _(config).map(function (c) {
+        // allow shortcut in the form type.name
+        if (_.isString(c)) {
+          var _c$split = c.split('.'),
+              _c$split2 = slicedToArray(_c$split, 2),
+              type = _c$split2[0],
+              _name = _c$split2[1];
+
+          c = { type: type, name: _name };
+        }
+        var name = c && c.type && c.name ? c.type + '.' + c.name : null;
+        if (!name || _.includes(added, name) || !_.get(libs, name)) return;
+        added.push(name);
+        return c;
+      }).without(undefined).value();
+    }
+  }, {
+    key: 'resolveDependencies',
+    value: function resolveDependencies(config) {
+      var newConfig = [];
+      var resolved = [],
+          unresolved = [];
+
+      unresolved = _.map(config, function (c) {
+        return c.type + '.' + c.name;
+      });
+      while (unresolved.length) {
+        _.forEach(unresolved, function (u) {
+          var _u$split = u.split('.'),
+              _u$split2 = slicedToArray(_u$split, 2),
+              type = _u$split2[0],
+              name = _u$split2[1];
+
+          newConfig.push({ type: type, name: name });
+          resolved.push(u);
+          _.forEach(_.get(libs, u + '._dependencies', []), function (dep) {
+            if (!_.includes(_.union(resolved, unresolved), dep)) {
+              unresolved.push(dep);
+            }
+          });
+        });
+        _.pull.apply(this, [unresolved].concat(resolved));
+      }
+      return newConfig;
+    }
+  }, {
+    key: 'buildLib',
+    value: function buildLib(config, type) {
+      var _imports = [],
+          _exports = [],
+          _returns = [];
+
+      _.forEach(config, function (c) {
+        if (c.type === type) {
+          _imports.push('import ' + c.name + ' from \'./' + c.type + '.' + c.name + '\'');
+          _exports.push('export { ' + c.name + ' }');
+          _returns.push('' + c.name);
         }
       });
-    });
-    _.pull.apply(this, [unresolved].concat(resolved));
-  }
-  return newConfig;
-}
-
-// makes the config into objects { type, name } and filters invalid
-function normalizeConfig(config) {
-  var added = [];
-  return _(config).map(function (c) {
-    // allow shortcut in the form type.name
-    if (_.isString(c)) {
-      var _c$split = c.split('.'),
-          _c$split2 = slicedToArray(_c$split, 2),
-          type = _c$split2[0],
-          _name = _c$split2[1];
-
-      c = { type: type, name: _name };
+      return _imports.join('\n') + '\n\n' + _exports.join('\n') + '\n\nexport default {\n  ' + _returns.join(',\n  ') + '\n}';
     }
-    var name = c && c.type && c.name ? c.type + '.' + c.name : null;
-    if (!name || _.includes(added, name) || !_.get(libs, name)) return;
-    added.push(name);
-    return c;
-  }).without(undefined).value();
-}
+  }]);
+  return LiteutilsCompiler;
+}();
 
-function buildLib(config, type) {
-  var _imports = [],
-      _exports = [],
-      _returns = [];
+var index = function (config) {
+  return new LiteutilsCompiler(config);
+};
 
-  _.forEach(config, function (c) {
-    if (c.type === type) {
-      _imports.push('import ' + c.name + ' from \'./' + c.type + '.' + c.name + '\'');
-      _exports.push('export { ' + c.name + ' }');
-      _returns.push('' + c.name);
-    }
-  });
-  return _imports.join('\n') + '\n\n' + _exports.join('\n') + '\n\nexport default {\n  ' + _returns.join(',\n  ') + '\n}';
-}
-
-// rewrite of compile with more versitile config structure
-function compile$1(config, dir) {
-  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-  var encoding = options.encoding || 'utf8';
-  var keep = ['.babelrc'];
-
-  return clean(compilePath, '.babelrc').then(function () {
-    return Promise$1.each(_.keys(config), function (type) {
-      var libConfig = config[type];
-      var includes = _.map(Array.isArray(libConfig.include) ? libConfig.include : type === 'dash' ? _.without(_.keys(dash), '_dependencies') : _.without(_.keys(query), '_dependencies'), function (name) {
-        return { type: type, name: name };
-      });
-      includes = _.union(includes, _.get(libs, type + '._dependencies', []));
-      var nc = normalizeConfig(includes);
-      var deps = resolveDependencies(nc);
-
-      return Promise$1.each(deps, function (d) {
-        var srcFile = path.resolve(srcPath, d.type, d.name + '.js');
-        var dstFile = path.resolve(compilePath, d.type + '.' + d.name + '.js');
-        return copy(srcFile, dstFile, encoding, function (data) {
-          // prefix import file names with type.
-          // filter out dependencies since not necessary in built lib
-          return data.replace(/(^import.*from\s+'\.\/)(.*)(')/gm, '$1' + d.type + '.$2$3').replace(/(^import.* from\s+')(\.)(\.\/.*)(\/)(.*')/gm, '$1$3.$5').replace(/^.*\._dependencies.*\n$/gm, '');
-        });
-      }).then(function () {
-        var libFile = path.resolve(compilePath, type + '.js');
-        var libData = buildLib(deps, type);
-        return fs.writeFileAsync(libFile, libData, { encoding: encoding });
-      }).then(function () {
-        var modSrc = path.resolve(srcPath, type, 'main.js');
-        var modDest = path.resolve(compilePath, type + '.index.js');
-        return copy(modSrc, modDest, encoding, function (data) {
-          return data.replace(/(^import\s+)(_)(.*)(\s+from\s+'\.\/)(index)(')/gm, '$1$2$3$4$3$6').replace(/(^import.* from\s+')(\.)(\.\/.*)(\/)(.*')/gm, '$1$3.$5').replace(/'\.\.\//gm, '\'./').replace(/(^let\s+infoName\s+=\s+')(.*)(')/gm, '$1' + (pkg.name || 'liteutils') + '$3').replace(/(^let\s+infoVersion\s+=\s+')(.*)(')/gm, '$1' + (pkg.version || '0.0.1') + '$3');
-        });
-      }).then(function () {
-        var entry = path.resolve(compilePath, type + '.index.js');
-        var destPath = path.resolve(compilePath, 'litedash.' + type + '.js');
-        var plugins = [babel()];
-        keep.push('litedash.' + type + '.js');
-
-        if (libConfig.minify) plugins.push(uglify());
-        return rollup.rollup({
-          entry: entry,
-          plugins: plugins
-        }).then(function (bundle) {
-          return bundle.write({
-            format: 'cjs',
-            dest: destPath
-          });
-        });
-      }).then(function () {
-        if (!libConfig.browserify) return;
-        var opts = {
-          standalone: libConfig.name
-        };
-        var srcPath = path.resolve(compilePath, 'litedash.' + type + '.js');
-        var destPath = path.resolve(compilePath, 'litedash.' + type + '.browser.js');
-        keep.push('litedash.' + type + '.browser.js');
-
-        return new Promise$1(function (resolve, reject) {
-          browserify(srcPath, opts).bundle(function (err, buff) {
-            if (err) return reject(err);
-            fs.writeFileAsync(destPath, buff, { encoding: encoding }).then(resolve).catch(reject);
-          });
-        });
-      });
-    }).then(function () {
-      if (options.postClean !== false) {
-        return clean(compilePath, keep);
-      }
-    }).catch(console.log);
-  });
-}
-
-module.exports = compile$1;
+module.exports = index;
