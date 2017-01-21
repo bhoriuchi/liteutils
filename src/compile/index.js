@@ -101,7 +101,12 @@ function compile (config, dir, options = {}) {
   return clean(compilePath, '.babelrc').then(() => {
     return Promise.each(_.keys(config), (type) => {
       let libConfig = config[type]
-      let includes = _.map(libConfig.include, (name) => { return { type, name } })
+      let includes = _.map(Array.isArray(libConfig.include)
+        ? libConfig.include
+        : type === 'dash'
+          ? _.without(_.keys(dash), '_dependencies')
+          : _.without(_.keys(query), '_dependencies'),
+        (name) => { return { type, name } })
       includes = _.union(includes, _.get(libs, `${type}._dependencies`, []))
       let nc = normalizeConfig(includes)
       let deps = resolveDependencies(nc)

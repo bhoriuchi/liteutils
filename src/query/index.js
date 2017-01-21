@@ -1,4 +1,5 @@
 import addClass from './addClass'
+import data from './data'
 import each from './each'
 import find from './find'
 import mapNodes from './mapNodes'
@@ -13,6 +14,7 @@ export default {
     'query.mapNodes'
   ],
   addClass,
+  data,
   each,
   find,
   mapNodes,

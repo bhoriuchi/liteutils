@@ -80,118 +80,58 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 };
 
-var asyncGenerator = function () {
-  function AwaitValue(value) {
-    this.value = value;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var defineProperty = function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
   }
 
-  function AsyncGenerator(gen) {
-    var front, back;
+  return obj;
+};
 
-    function send(key, arg) {
-      return new Promise(function (resolve, reject) {
-        var request = {
-          key: key,
-          arg: arg,
-          resolve: resolve,
-          reject: reject,
-          next: null
-        };
 
-        if (back) {
-          back = back.next = request;
-        } else {
-          front = back = request;
-          resume(key, arg);
-        }
-      });
-    }
 
-    function resume(key, arg) {
-      try {
-        var result = gen[key](arg);
-        var value = result.value;
 
-        if (value instanceof AwaitValue) {
-          Promise.resolve(value.value).then(function (arg) {
-            resume("next", arg);
-          }, function (arg) {
-            resume("throw", arg);
-          });
-        } else {
-          settle(result.done ? "return" : "normal", result.value);
-        }
-      } catch (err) {
-        settle("throw", err);
-      }
-    }
 
-    function settle(type, value) {
-      switch (type) {
-        case "return":
-          front.resolve({
-            value: value,
-            done: true
-          });
-          break;
 
-        case "throw":
-          front.reject(value);
-          break;
 
-        default:
-          front.resolve({
-            value: value,
-            done: false
-          });
-          break;
-      }
 
-      front = front.next;
 
-      if (front) {
-        resume(front.key, front.arg);
-      } else {
-        back = null;
-      }
-    }
 
-    this._invoke = send;
 
-    if (typeof gen.return !== "function") {
-      this.return = undefined;
-    }
-  }
 
-  if (typeof Symbol === "function" && Symbol.asyncIterator) {
-    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
-      return this;
-    };
-  }
 
-  AsyncGenerator.prototype.next = function (arg) {
-    return this._invoke("next", arg);
-  };
 
-  AsyncGenerator.prototype.throw = function (arg) {
-    return this._invoke("throw", arg);
-  };
 
-  AsyncGenerator.prototype.return = function (arg) {
-    return this._invoke("return", arg);
-  };
 
-  return {
-    wrap: function (fn) {
-      return function () {
-        return new AsyncGenerator(fn.apply(this, arguments));
-      };
-    },
-    await: function (value) {
-      return new AwaitValue(value);
-    }
-  };
-}();
+
+
+
+
 
 var slicedToArray = function () {
   function sliceIterator(arr, i) {
@@ -230,6 +170,18 @@ var slicedToArray = function () {
     }
   };
 }();
+
+
+
+
+
+
+
+
+
+
+
+
 
 var toConsumableArray = function (arr) {
   if (Array.isArray(arr)) {
@@ -285,26 +237,55 @@ var includes = function includes(obj, key) {
 includes._accepts = [Array];
 includes._dependencies = ['dash.isArray'];
 
-function _arrayMerge(target, source, seen) {
-  forEach(source, function (val, i) {
-    if (isArray(val) && !isArray(target[i])) target[i] = val;else if (target[i] !== undefined) _merge(target[i], val, clone(seen));else target.push(val);
-  });
-}
+// import isArray from './isArray'
+// import isDate from './isDate'
+// import clone from './clone'
 
-function _merge(target, source) {
-  var seen = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
+// modified from http://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge
+function mergeDeep(target, source) {
+  var seen = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
 
   if (includes(seen, source) || includes(seen, source)) return target;
   seen = seen.concat([target, source]);
 
-  forEach(source, function (s, k) {
-    var t = target[k];
-    if (t === undefined && isHash(s)) target[k] = _merge({}, s, clone(seen));else if (isHash(t) && isHash(s)) target[k] = _merge(t, s, clone(seen));else if (isArray(s) && !isArray(t)) target[k] = s;else if (isArray(s)) forEach(s, function (val, i) {
-      return _arrayMerge(t, s, seen);
-    });else if (isDate(s)) target[k] = new Date(s);else target[k] = s;
-  });
+  if (isHash(target) && isHash(source)) {
+    for (var key in source) {
+      if (isHash(source[key])) {
+        if (!target[key]) Object.assign(target, defineProperty({}, key, {}));
+        mergeDeep(target[key], source[key], seen.slice());
+      } else {
+        Object.assign(target, defineProperty({}, key, source[key]));
+      }
+    }
+  }
   return target;
 }
+
+/*
+function _arrayMerge (target, source, seen) {
+  forEach(source, (val, i) => {
+    if (isArray(val) && !isArray(target[i])) target[i] = val
+    else if (target[i] !== undefined) _merge(target[i], val, clone(seen))
+    else target.push(val)
+  })
+}
+
+function _merge (target, source, seen = []) {
+  if (includes(seen, source) || includes(seen, source)) return target
+  seen = seen.concat([target, source])
+
+  forEach(source, (s, k) => {
+    let t = target[k]
+    if (t === undefined && isHash(s)) target[k] = _merge({}, s, clone(seen))
+    else if (isHash(t) && isHash(s)) target[k] = _merge(t, s, clone(seen))
+    else if (isArray(s) && !isArray(t)) target[k] = s
+    else if (isArray(s)) forEach(s, (val, i) => _arrayMerge(t, s, seen))
+    else if (isDate(s)) target[k] = new Date(s)
+    else target[k] = s
+  })
+  return target
+}
+*/
 
 var merge = function merge() {
   var args = [].concat(Array.prototype.slice.call(arguments));
@@ -315,13 +296,13 @@ var merge = function merge() {
   var sources = args.slice(1);
 
   forEach(sources, function (source) {
-    if (isHash(source)) _merge(target, source);
+    if (isHash(source)) mergeDeep(target, source);
   });
   return target;
 };
 
 merge._accepts = [Object];
-merge._dependencies = ['dash.isArray', 'dash.isHash', 'dash.isDate', 'dash.forEach', 'dash.includes', 'dash.clone'];
+merge._dependencies = ['dash.isHash', 'dash.forEach', 'dash.includes'];
 
 var map = function map(obj, fn) {
   var output = [];
@@ -335,7 +316,7 @@ map._accepts = [Object, Array];
 map._dependencies = ['dash.forEach'];
 
 var clone = function clone(obj) {
-  var deep = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+  var deep = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
   if (isArray(obj)) return deep ? map(obj, function (o) {
     return clone(o, true);
@@ -349,11 +330,11 @@ clone._accepts = [Object, Array];
 clone._dependencies = ['dash.isArray', 'dash.isHash', 'dash.isDate', 'dash.merge', 'dash.map'];
 
 var circular = function circular(obj) {
-  var value = arguments.length <= 1 || arguments[1] === undefined ? '[Circular]' : arguments[1];
+  var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '[Circular]';
 
   var circularEx = function circularEx(_obj) {
-    var key = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
-    var seen = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
+    var key = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+    var seen = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
 
     seen.push(_obj);
     if (isObject(_obj)) {
@@ -436,9 +417,9 @@ var stringToPathArray = function stringToPathArray(pathString) {
 stringToPathArray._accepts = [String];
 stringToPathArray._dependencies = [];
 
-var get$1 = function get(obj, path, defaultValue) {
+var get$1 = function get(obj, path$$1, defaultValue) {
   var value = obj;
-  var fields = isArray(path) ? path : stringToPathArray(path);
+  var fields = isArray(path$$1) ? path$$1 : stringToPathArray(path$$1);
   if (fields.length === 0) return defaultValue;
 
   try {
@@ -454,9 +435,9 @@ var get$1 = function get(obj, path, defaultValue) {
 get$1._accepts = [Object, Array];
 get$1._dependencies = ['dash.isArray', 'dash.stringToPathArray'];
 
-var has = function has(obj, path) {
+var has = function has(obj, path$$1) {
   var found = true;
-  var fields = isArray(path) ? path : stringToPathArray(path);
+  var fields = isArray(path$$1) ? path$$1 : stringToPathArray(path$$1);
   if (!fields.length) return false;
   forEach(fields, function (field) {
     if (obj[field] === undefined) {
@@ -511,8 +492,8 @@ isPromise._accepts = ['ANY'];
 isPromise._dependencies = ['dash.isFunction'];
 
 var range = function range() {
-  var number = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-  var increment = arguments.length <= 1 || arguments[1] === undefined ? 1 : arguments[1];
+  var number = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+  var increment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
 
   return [].concat(toConsumableArray(Array(number).keys())).map(function (i) {
     return i * increment;
@@ -581,7 +562,7 @@ pickBy._accepts = [Object];
 pickBy._dependencies = ['dash.isHash', 'dash.forEach'];
 
 var pretty = function pretty(obj) {
-  var space = arguments.length <= 1 || arguments[1] === undefined ? '  ' : arguments[1];
+  var space = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '  ';
 
   try {
     return JSON.stringify(obj, null, space);
@@ -594,8 +575,8 @@ var pretty = function pretty(obj) {
 pretty._accepts = [Object, Array, Date];
 pretty._dependencies = [];
 
-var set$1 = function set(obj, path, val) {
-  var fields = isArray(path) ? path : stringToPathArray(path);
+var set$1 = function set(obj, path$$1, val) {
+  var fields = isArray(path$$1) ? path$$1 : stringToPathArray(path$$1);
 
   forEach(fields, function (field, idx) {
     if (idx === fields.length - 1) obj[field] = val;else if (!obj[field]) obj[field] = isNumber(field) ? [] : {};
@@ -717,6 +698,80 @@ var addClass = function addClass(className) {
 
 addClass._dependencies = ['query.each', 'dash.forEach'];
 
+var rx = /^data-(.+)/;
+
+function getAttrs(node) {
+  var obj = {};
+
+  forEach(node.attributes, function (attr) {
+    var name = attr.name,
+        nodeName = attr.nodeName,
+        localName = attr.localName,
+        value = attr.value,
+        nodeValue = attr.nodeValue,
+        textContent = attr.textContent;
+
+    name = name || nodeName || localName;
+    value = value || nodeValue || textContent;
+
+    if (isString$1(name) && name.match(rx)) {
+      obj[name.replace(rx, '$1')] = value;
+    }
+  });
+  return obj;
+}
+
+function hasAttr(node, attrName) {
+  var has = false;
+  if (!node || !node.attributes) return has;
+  forEach(node.attributes, function () {
+    var _attr = attr,
+        name = _attr.name,
+        nodeName = _attr.nodeName,
+        localName = _attr.localName;
+
+    name = name || nodeName || localName;
+    if (name === 'data-' + attrName) {
+      has = true;
+      return false;
+    }
+  });
+  return has;
+}
+
+function setAttr(node, key, value) {
+  if (hasAttr(node, key)) {
+    node.setAttribute('data-' + key, value);
+  } else {
+    var _attr2 = document.createAttribute('data-' + key);
+    _attr2.value = value;
+    node.setAttributeNode(_attr2);
+  }
+}
+
+var data = function data(key, val) {
+  var node = this[0];
+
+  if (!node) {
+    return null;
+  } else if (!key) {
+    return getAttrs(node);
+  } else if (key && val === undefined) {
+    if (isString$1(key)) {
+      return getAttrs(node)[key];
+    } else if (isObject(key)) {
+      return forEach(key, function (v, k) {
+        setAttr(node, k, v);
+      });
+    }
+  }
+
+  // set a key/value
+  setAttr(node, key, val);
+};
+
+data._dependencies = ['dash.isString', 'dash.isObject', 'dash.forEach'];
+
 var each = function each(fn) {
   forEach(this.slice(0, this.length), function (v, k) {
     return fn.bind(v)(k, v);
@@ -735,7 +790,7 @@ var mapNodes = function mapNodes(element, selector) {
 mapNodes._chainable = false;
 mapNodes._dependencies = ['dash.mapWith', 'dash.isObject'];
 
-var find = function find(selector) {
+var find$1 = function find(selector) {
   var results = [];
   this.each(function () {
     results = union(results, mapNodes(this, selector));
@@ -743,18 +798,16 @@ var find = function find(selector) {
   return this.init(results, this);
 };
 
-find._terminates = true;
-find._dependencies = ['query.mapNodes', 'query.each', 'dash.union'];
+find$1._terminates = true;
+find$1._dependencies = ['query.mapNodes', 'query.each', 'dash.union'];
 
 function removeEvent(store, el, event, handler, uuid) {
   var toRemove = [];
 
-  var _event$split = event.split(/\.(.+)?/);
-
-  var _event$split2 = slicedToArray(_event$split, 2);
-
-  var evt = _event$split2[0];
-  var ns = _event$split2[1];
+  var _event$split = event.split(/\.(.+)?/),
+      _event$split2 = slicedToArray(_event$split, 2),
+      evt = _event$split2[0],
+      ns = _event$split2[1];
 
   forEach(store.active, function (e) {
     var isElement = e.el === el;
@@ -856,12 +909,10 @@ function addEvents(one, events, selector, data, fn) {
     var prefix = !el.addEventListener ? 'on' : '';
 
     forEach(events.split(/\s+/g), function (event) {
-      var _event$split = event.split(/\.(.+)?/);
-
-      var _event$split2 = slicedToArray(_event$split, 2);
-
-      var evt = _event$split2[0];
-      var ns = _event$split2[1];
+      var _event$split = event.split(/\.(.+)?/),
+          _event$split2 = slicedToArray(_event$split, 2),
+          evt = _event$split2[0],
+          ns = _event$split2[1];
 
       event = evt;
       var off = offHandler(el, '' + prefix + evt, handler);
@@ -899,8 +950,9 @@ one._dependencies = ['query.onEvent'];
 var query = {
   _dependencies: ['dash.forEach', 'query.mapNodes'],
   addClass: addClass,
+  data: data,
   each: each,
-  find: find,
+  find: find$1,
   mapNodes: mapNodes,
   off: off,
   on: on,
@@ -922,7 +974,7 @@ var compilePath = path.resolve(baseDir, './compiled');
 
 // copies a file
 function copy(src, dest) {
-  var encoding = arguments.length <= 2 || arguments[2] === undefined ? 'utf8' : arguments[2];
+  var encoding = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'utf8';
   var modifier = arguments[3];
 
   return fs.readFileAsync(src, { encoding: encoding }).then(function (data) {
@@ -933,7 +985,7 @@ function copy(src, dest) {
 
 // cleans the target directory before build/compile
 function clean(dir) {
-  var except = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
+  var except = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
 
   except = Array.isArray(except) ? except : [except];
   return fs.readdirAsync(dir).then(function (files) {
@@ -946,20 +998,18 @@ function clean(dir) {
 // updates the config with the required dependencies
 function resolveDependencies(config) {
   var newConfig = [];
-  var resolved = [];
-  var unresolved = [];
+  var resolved = [],
+      unresolved = [];
 
   unresolved = _.map(config, function (c) {
     return c.type + '.' + c.name;
   });
   while (unresolved.length) {
     _.forEach(unresolved, function (u) {
-      var _u$split = u.split('.');
-
-      var _u$split2 = slicedToArray(_u$split, 2);
-
-      var type = _u$split2[0];
-      var name = _u$split2[1];
+      var _u$split = u.split('.'),
+          _u$split2 = slicedToArray(_u$split, 2),
+          type = _u$split2[0],
+          name = _u$split2[1];
 
       newConfig.push({ type: type, name: name });
       resolved.push(u);
@@ -980,12 +1030,10 @@ function normalizeConfig(config) {
   return _(config).map(function (c) {
     // allow shortcut in the form type.name
     if (_.isString(c)) {
-      var _c$split = c.split('.');
-
-      var _c$split2 = slicedToArray(_c$split, 2);
-
-      var type = _c$split2[0];
-      var _name = _c$split2[1];
+      var _c$split = c.split('.'),
+          _c$split2 = slicedToArray(_c$split, 2),
+          type = _c$split2[0],
+          _name = _c$split2[1];
 
       c = { type: type, name: _name };
     }
@@ -997,9 +1045,9 @@ function normalizeConfig(config) {
 }
 
 function buildLib(config, type) {
-  var _imports = [];
-  var _exports = [];
-  var _returns = [];
+  var _imports = [],
+      _exports = [],
+      _returns = [];
 
   _.forEach(config, function (c) {
     if (c.type === type) {
@@ -1012,8 +1060,8 @@ function buildLib(config, type) {
 }
 
 // rewrite of compile with more versitile config structure
-function compile(config, dir) {
-  var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+function compile$1(config, dir) {
+  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
   var encoding = options.encoding || 'utf8';
   var keep = ['.babelrc'];
@@ -1021,7 +1069,7 @@ function compile(config, dir) {
   return clean(compilePath, '.babelrc').then(function () {
     return Promise$1.each(_.keys(config), function (type) {
       var libConfig = config[type];
-      var includes = _.map(libConfig.include, function (name) {
+      var includes = _.map(Array.isArray(libConfig.include) ? libConfig.include : type === 'dash' ? _.without(_.keys(dash), '_dependencies') : _.without(_.keys(query), '_dependencies'), function (name) {
         return { type: type, name: name };
       });
       includes = _.union(includes, _.get(libs, type + '._dependencies', []));
@@ -1086,4 +1134,4 @@ function compile(config, dir) {
   });
 }
 
-module.exports = compile;
+module.exports = compile$1;

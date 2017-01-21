@@ -10,14 +10,11 @@ let config = {
     include: ['map', 'keys']
   },
   */
-  /*
   query: {
     minify: false,
     browserify: true,
-    name: '$_',
-    include: ['find', 'addClass', 'on', 'off', 'one']
-  }
-  */
+    name: '$_'
+  } /* ,
   dash: {
     minify: false,
     include: [
@@ -54,10 +51,10 @@ let config = {
       'uniq',
       'without'
     ]
-  }
+  } */
 }
 
-compile(config, compiledPath, { postClean: false }).then(() => {
+compile(config, compiledPath, { postClean: true }).then(() => {
   // let _ = require(path.resolve(compiledPath, 'litedash.dash'))
   // console.log(_.range(10))
   console.log('done')
