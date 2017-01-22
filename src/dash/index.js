@@ -38,6 +38,7 @@ import toPath from './toPath'
 import toUpper from './toUpper'
 import union from './union'
 import uniq from './uniq'
+import uuid from './uuid'
 import without from './without'
 
 export { forEach }
@@ -83,5 +84,6 @@ export default {
   toUpper,
   union,
   uniq,
+  uuid,
   without
 }
