@@ -1,7 +1,7 @@
 import isArray from './isArray'
 import range from './range'
 
-let keys = function (obj) {
+function keys (obj) {
   try {
     return isArray(obj) ? range(obj.length) : Object.keys(obj)
   } catch (err) {

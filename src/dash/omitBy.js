@@ -1,7 +1,7 @@
 import isHash from './isHash'
 import forEach from './forEach'
 
-let omitBy = function (obj, fn) {
+function omitBy (obj, fn) {
   let newObj = {}
   if (!isHash(obj)) return newObj
   forEach(obj, (v, k) => {

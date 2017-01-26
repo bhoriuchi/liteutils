@@ -1,4 +1,5 @@
 import capitalize from './capitalize'
+import castArray from './castArray'
 import circular from './circular'
 import clone from './clone'
 import contains from './contains'
@@ -6,15 +7,18 @@ import difference from './difference'
 import ensureArray from './ensureArray'
 import escapeRegExp from './escapeRegExp'
 import filter from './filter'
+import first from './first'
 import find from './filter'
 import forEach from './forEach'
 import get from './get'
 import has from './has'
+import identity from './identity'
 import includes from './includes'
 import intersection from './intersection'
 import isArray from './isArray'
 import isBoolean from './isBoolean'
 import isDate from './isDate'
+import isEmpty from './isEmpty'
 import isFunction from './isFunction'
 import isHash from './isHash'
 import isNumber from './isNumber'
@@ -31,8 +35,10 @@ import omitBy from './omitBy'
 import pickBy from './pickBy'
 import pretty from './pretty'
 import range from './range'
+import reduce from './reduce'
 import set from './set'
 import stringify from './stringify'
+import sum from './sum'
 import toLower from './toLower'
 import toPath from './toPath'
 import toUpper from './toUpper'
@@ -45,6 +51,7 @@ export { forEach }
 
 export default {
   capitalize,
+  castArray,
   circular,
   clone,
   contains,
@@ -52,15 +59,18 @@ export default {
   ensureArray,
   escapeRegExp,
   filter,
+  first,
   find,
   forEach,
   get,
   has,
+  identity,
   includes,
   intersection,
   isArray,
   isBoolean,
   isDate,
+  isEmpty,
   isFunction,
   isHash,
   isNumber,
@@ -77,8 +87,10 @@ export default {
   pickBy,
   pretty,
   range,
+  reduce,
   set,
   stringify,
+  sum,
   toLower,
   toPath,
   toUpper,

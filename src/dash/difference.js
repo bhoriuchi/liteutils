@@ -1,6 +1,6 @@
 import isArray from './isArray'
 
-let difference = function () {
+function difference () {
   let args = [ ...arguments ]
   if (!args.length) return []
 

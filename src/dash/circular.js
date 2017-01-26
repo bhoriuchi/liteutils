@@ -4,7 +4,7 @@ import isFunction from './isFunction'
 import contains from './contains'
 import clone from './clone'
 
-let circular = function (obj, value = '[Circular]') {
+function circular (obj, value = '[Circular]') {
   let circularEx = (_obj, key = null, seen = []) => {
     seen.push(_obj)
     if (isObject(_obj)) {

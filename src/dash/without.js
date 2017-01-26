@@ -1,7 +1,7 @@
 import forEach from './forEach'
 import includes from './includes'
 
-let without = function () {
+function without () {
   let output = []
   let args = [ ...arguments ]
   if (args.length < 2) return args.length ? args[0] : []

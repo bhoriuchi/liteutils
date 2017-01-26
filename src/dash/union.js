@@ -1,6 +1,6 @@
 import isArray from './isArray'
 
-let union = function () {
+function union () {
   let args = [ ...arguments ]
   if (!args.length) return []
 

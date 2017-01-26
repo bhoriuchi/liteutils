@@ -1,6 +1,6 @@
 import isString from './isString'
 
-let toUpper = function (string) {
+function toUpper (string) {
   return isString(string) ? string.toUpperCase() : ''
 }
 

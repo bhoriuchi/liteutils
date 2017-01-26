@@ -2,7 +2,7 @@ import isArray from './isArray'
 import isDate from './isDate'
 import isObject from './isObject'
 
-let isHash = function (obj) {
+function isHash (obj) {
   return isObject(obj) && !isArray(obj) && !isDate(obj)
 }
 

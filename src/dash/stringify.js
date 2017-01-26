@@ -2,7 +2,7 @@ import has from './has'
 import isArray from './isArray'
 import isHash from './isHash'
 
-let stringify = function (obj) {
+function stringify (obj) {
   try {
     if (isHash(obj) || isArray(obj)) return JSON.stringify(obj)
     else if (has(obj, 'toString')) return obj.toString()

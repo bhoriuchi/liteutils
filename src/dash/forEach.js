@@ -1,6 +1,6 @@
 import isArray from './isArray'
 
-let forEach = function (obj, fn) {
+function forEach (obj, fn) {
   try {
     if (isArray(obj)) {
       let idx = 0

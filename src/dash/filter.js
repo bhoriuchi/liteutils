@@ -1,7 +1,7 @@
 import isArray from './isArray'
 import forEach from './forEach'
 
-let filter = function (obj, fn) {
+function filter (obj, fn) {
   let newObj = []
   if (!isArray(obj)) return newObj
   forEach(obj, function (v, k) {

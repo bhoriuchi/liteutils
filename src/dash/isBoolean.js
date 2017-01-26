@@ -1,4 +1,4 @@
-let isBoolean = function (obj) {
+function isBoolean (obj) {
   return obj === true || obj === false
 }
 

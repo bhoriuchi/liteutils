@@ -1,5 +1,5 @@
 // taken from lodash - https://github.com/lodash/lodash
-let escapeRegExp = function (str) {
+function escapeRegExp (str) {
   let reRegExpChar = /[\\^$.*+?()[\]{}|]/g
   let reHasRegExpChar = RegExp(reRegExpChar.source)
   str = toString(str)

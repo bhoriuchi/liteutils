@@ -1,6 +1,6 @@
 import isArray from './isArray'
 
-let intersection = function () {
+function intersection () {
   let args = [ ...arguments ]
   if (!args.length) return []
 

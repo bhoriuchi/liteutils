@@ -1,7 +1,7 @@
 import isString from './isString'
 
 // ported from https://gist.github.com/tdukart/b87afb278c41245741ae7a0c355a0a0b
-let kebabCase = function (string) {
+function kebabCase (string) {
   if (!isString(string)) return ''
   let result = string
 

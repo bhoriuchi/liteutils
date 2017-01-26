@@ -1,4 +1,4 @@
-let isDate = function (obj) {
+function isDate (obj) {
   return obj instanceof Date
 }
 

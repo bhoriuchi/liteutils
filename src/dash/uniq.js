@@ -1,6 +1,6 @@
 import isArray from './isArray'
 
-let uniq = function (list) {
+function uniq (list) {
   return isArray(list) ? [ ...new Set(list) ] : []
 }
 

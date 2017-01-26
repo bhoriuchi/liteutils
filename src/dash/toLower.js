@@ -1,6 +1,6 @@
 import isString from './isString'
 
-let toLower = function (string) {
+function toLower (string) {
   return isString(string) ? string.toLowerCase() : ''
 }
 

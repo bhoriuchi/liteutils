@@ -1,4 +1,4 @@
-let isArray = function (obj) {
+function isArray (obj) {
   return Array.isArray(obj)
 }
 

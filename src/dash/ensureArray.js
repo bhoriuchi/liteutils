@@ -1,10 +1,9 @@
-import isArray from './isArray'
-
-let ensureArray = function (obj) {
-  return !obj ? [] : isArray(obj) ? obj : [obj]
+function ensureArray (obj) {
+  if (!arguments.length) return []
+  return Array.isArray(obj) ? obj : [obj]
 }
 
 ensureArray._accepts = ['ANY']
-ensureArray._dependencies = ['dash.isArray']
+ensureArray._dependencies = []
 
 export default ensureArray

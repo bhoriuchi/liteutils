@@ -3,7 +3,7 @@ import isNumber from './isNumber'
 import toPath from './toPath'
 import forEach from './forEach'
 
-let set = function (obj, path, val) {
+function set (obj, path, val) {
   let fields = isArray(path) ? path : toPath(path)
 
   forEach(fields, (field, idx) => {
