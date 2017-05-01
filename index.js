@@ -651,7 +651,7 @@ pretty._accepts = [Object, Array, Date];
 pretty._dependencies = [];
 
 function reduce(collection, iteratee, accumulator) {
-  if (!isObject(collection) || !isArray(collection)) return undefined;
+  if (!isObject(collection) && !isArray(collection)) return undefined;
   if (!isFunction(iteratee)) {
     accumulator = iteratee;
     iteratee = identity;

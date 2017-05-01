@@ -6,7 +6,7 @@ import identity from './identity'
 import keys from './keys'
 
 function reduce (collection, iteratee, accumulator) {
-  if (!isObject(collection) || !isArray(collection)) return undefined
+  if (!isObject(collection) && !isArray(collection)) return undefined
   if (!isFunction(iteratee)) {
     accumulator = iteratee
     iteratee = identity
