@@ -2,9 +2,12 @@ import isHash from './isHash'
 import forEach from './forEach'
 import includes from './includes'
 
+
+
+
 // modified from http://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge
 function mergeDeep(target, source, seen = []) {
-  if (includes(seen, source) || includes(seen, source)) return target
+  if (includes(seen, target) || includes(seen, source)) return target
   seen = seen.concat([target, source])
 
   if (isHash(target) && isHash(source)) {

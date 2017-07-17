@@ -275,7 +275,7 @@ includes._dependencies = ['dash.isArray'];
 function mergeDeep(target, source) {
   var seen = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
 
-  if (includes(seen, source) || includes(seen, source)) return target;
+  if (includes(seen, target) || includes(seen, source)) return target;
   seen = seen.concat([target, source]);
 
   if (isHash(target) && isHash(source)) {
@@ -1128,10 +1128,10 @@ var pkg = { name: 'liteutils', version: '0.1.0' };
 var baseDir = __dirname.replace(/(.*\/liteutils).*/, '$1');
 var srcPath = path.resolve(baseDir, './src');
 var compilePath = path.resolve(baseDir, './compiled');
-var libs = { dash: dash, query: query };
+var libs = { dash: dash, query: query
 
-// copy function that can modify the files contents before writing
-function copy(src, dest) {
+  // copy function that can modify the files contents before writing
+};function copy(src, dest) {
   var encoding = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'utf8';
   var modifier = arguments[3];
 
