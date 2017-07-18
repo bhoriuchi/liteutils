@@ -91,7 +91,6 @@ class LiteutilsCompiler {
               let modSrc = path.resolve(srcPath, type, 'main.js')
               let modDest = path.resolve(compilePath, `${type}.index.js`)
               return copy(modSrc, modDest, encoding, (data) => {
-                data = eslint === false ? `/* eslint-disable */\n${data}` : data
                 return data
                   .replace(/(^import\s+)(_)(.*)(\s+from\s+'\.\/)(index)(')/gm, '$1$2$3$4$3$6')
                   .replace(/(^import.* from\s+')(\.)(\.\/.*)(\/)(.*')/gm, '$1$3.$5')
@@ -115,6 +114,10 @@ class LiteutilsCompiler {
                   format: 'cjs',
                   dest: destPath
                 })
+              }).then(() => {
+                copy(destPath, destPath, encoding, data => {
+                  return eslint === false ? `/* eslint-disable */\n${data}` : data
+                })
               })
             })
             // do browserify transform if specified
@@ -130,6 +133,10 @@ class LiteutilsCompiler {
                 Browserify(srcPath, opts).bundle((err, buff) => {
                   if (err) return reject(err)
                   return fs.writeFileAsync(destPath, buff, { encoding }).then(resolve, reject)
+                })
+              }).then(() => {
+                copy(destPath, destPath, encoding, data => {
+                  return eslint === false ? `/* eslint-disable */\n${data}` : data
                 })
               })
             })

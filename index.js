@@ -1212,7 +1212,6 @@ var LiteutilsCompiler = function () {
             var modSrc = path.resolve(srcPath, type, 'main.js');
             var modDest = path.resolve(compilePath, type + '.index.js');
             return copy(modSrc, modDest, encoding, function (data) {
-              data = eslint === false ? '/* eslint-disable */\n' + data : data;
               return data.replace(/(^import\s+)(_)(.*)(\s+from\s+'\.\/)(index)(')/gm, '$1$2$3$4$3$6').replace(/(^import.* from\s+')(\.)(\.\/.*)(\/)(.*')/gm, '$1$3.$5').replace(/'\.\.\//gm, '\'./').replace(/(^let\s+infoName\s+=\s+')(.*)(')/gm, '$1' + (pkg.name || 'liteutils') + '$3').replace(/(^let\s+infoVersion\s+=\s+')(.*)(')/gm, '$1' + (pkg.version || '0.0.1') + '$3') + '\n';
             });
           })
@@ -1231,6 +1230,10 @@ var LiteutilsCompiler = function () {
                 format: 'cjs',
                 dest: destPath
               });
+            }).then(function () {
+              copy(destPath, destPath, encoding, function (data) {
+                return eslint === false ? '/* eslint-disable */\n' + data : data;
+              });
             });
           })
           // do browserify transform if specified
@@ -1246,6 +1249,10 @@ var LiteutilsCompiler = function () {
               Browserify(srcPath, opts).bundle(function (err, buff) {
                 if (err) return reject(err);
                 return fs.writeFileAsync(destPath, buff, { encoding: encoding }).then(resolve, reject);
+              });
+            }).then(function () {
+              copy(destPath, destPath, encoding, function (data) {
+                return eslint === false ? '/* eslint-disable */\n' + data : data;
               });
             });
           })
