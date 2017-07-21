@@ -850,13 +850,6 @@ var addClass = function addClass(className) {
       return el.classList.add(clazz);
     });
   });
-  /*
-  each(this, function (i, el) {
-    each(classList, function (j, clazz) {
-      el.classList.add(clazz)
-    })
-  })
-  */
 };
 
 addClass._dependencies = ['query.each', 'dash.forEach'];

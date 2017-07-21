@@ -5,13 +5,6 @@ let addClass = function (className) {
   this.each(function (i, el) {
     forEach(classList, (clazz) => el.classList.add(clazz))
   })
-  /*
-  each(this, function (i, el) {
-    each(classList, function (j, clazz) {
-      el.classList.add(clazz)
-    })
-  })
-  */
 }
 
 addClass._dependencies = [

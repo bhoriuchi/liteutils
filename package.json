@@ -1,7 +1,7 @@
 {
   "name": "liteutils",
   "version": "0.1.0",
-  "description": "Lite versions of lodash and jQuery",
+  "description": "Customizable jQuery-like and lodash-like libraries",
   "license": "MIT",
   "main": "index.js",
   "repository": {

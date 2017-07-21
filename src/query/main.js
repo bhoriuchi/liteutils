@@ -1,6 +1,7 @@
 import _query from './index'
 import mapNodes from '../query/mapNodes'
 import forEach from '../dash/forEach'
+import htmlGenerator from './htmlGenerator'
 
 let infoName = 'liteutils'
 let infoVersion = '0.1.0'
@@ -8,14 +9,29 @@ let infoVersion = '0.1.0'
 let arr = []
 
 let lQuery = function (selector, context) {
-  context = context || document
-  if (selector !== document) this.prevObject = context instanceof lQuery ? context : new query.fn.init(context)
   let nodes = []
-  if (Array.isArray(selector)) nodes = selector
-  else if (selector instanceof lQuery) nodes = selector.slice(0, nodes.length)
-  else if (typeof selector === 'string') nodes = mapNodes(context, selector)
-  else nodes = [ selector ]
+  context = context || document
+
+  if (selector !== document) {
+    this.prevObject = context instanceof lQuery
+      ? context
+      : new query.fn.init(context)
+  }
+
+  if (Array.isArray(selector)) {
+    nodes = selector
+  } else if (selector instanceof lQuery) {
+    nodes = selector.slice(0, nodes.length)
+  } else if (typeof selector === 'string') {
+    nodes = selector.match(/^</)
+      ? htmlGenerator(selector)
+      : mapNodes(context, selector)
+  } else {
+    nodes = [ selector ]
+  }
+
   this.length = nodes.length
+
   forEach(nodes, (node, idx) => {
     this[idx] = node
   })
