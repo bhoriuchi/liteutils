@@ -1263,7 +1263,8 @@ var LiteutilsCompiler = function () {
       }).then(function () {
         return _this.callback();
       }, function (error) {
-        return _this.callback(error);
+        console.error(error);
+        _this.callback(error);
       });
     }
   }, {

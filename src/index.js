@@ -152,7 +152,10 @@ class LiteutilsCompiler {
             })
         })
     })
-      .then(() => this.callback(), (error) => this.callback(error))
+      .then(() => this.callback(), (error) => {
+        console.error(error)
+        this.callback(error)
+      })
   }
 
   normalizeConfig (config) {

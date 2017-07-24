@@ -1,12 +1,17 @@
 import _query from './index'
 import mapNodes from '../query/mapNodes'
 import forEach from '../dash/forEach'
-import htmlGenerator from './htmlGenerator'
 
 let infoName = 'liteutils'
 let infoVersion = '0.1.0'
 
 let arr = []
+
+function htmlGenerator (html) {
+  let div = document.createElement('div')
+  div.innerHTML = html
+  return div.childNodes
+}
 
 let lQuery = function (selector, context) {
   let nodes = []
