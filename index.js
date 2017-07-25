@@ -662,6 +662,18 @@ function pretty(obj) {
 pretty._accepts = [Object, Array, Date];
 pretty._dependencies = [];
 
+function properCase(string) {
+  var separator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ' ';
+
+  if (!isString(string)) return '';
+  return string.replace(/[\s-_]+/g, '-').split('-').map(function (v) {
+    return v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
+  }).join(separator);
+}
+
+properCase._accepts = [String];
+properCase._dependencies = ['dash.isString'];
+
 function reduce(collection, iteratee, accumulator) {
   if (!isObject(collection) && !isArray(collection)) return undefined;
   if (!isFunction(iteratee)) {
@@ -842,6 +854,7 @@ var dash = {
   omitBy: omitBy,
   pickBy: pickBy,
   pretty: pretty,
+  properCase: properCase,
   range: range,
   reduce: reduce,
   set: set$1,

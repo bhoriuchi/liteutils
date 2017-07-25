@@ -35,6 +35,7 @@ import merge from './merge'
 import omitBy from './omitBy'
 import pickBy from './pickBy'
 import pretty from './pretty'
+import properCase from './properCase'
 import range from './range'
 import reduce from './reduce'
 import set from './set'
@@ -88,6 +89,7 @@ export default {
   omitBy,
   pickBy,
   pretty,
+  properCase,
   range,
   reduce,
   set,
