@@ -589,15 +589,27 @@ function keys(obj) {
 keys._accepts = [Object, Array];
 keys._dependencies = ['dash.isArray', 'dash.range'];
 
-function mapValues(obj, fn) {
+function mapKeys(obj, fn) {
   var newObj = {};
   forEach(obj, function (v, k) {
-    newObj[k] = fn(v);
+    var newKey = fn(v, k);
+    newObj[typeof newKey === 'string' ? newKey : k] = v;
   });
   return newObj;
 }
 
-mapValues._accepts = [Object, Array];
+mapKeys._accepts = [Object];
+mapKeys._dependencies = ['dash.forEach'];
+
+function mapValues(obj, fn) {
+  var newObj = {};
+  forEach(obj, function (v, k) {
+    newObj[k] = fn(v, k);
+  });
+  return newObj;
+}
+
+mapValues._accepts = [Object];
 mapValues._dependencies = ['dash.forEach'];
 
 function mapWith(obj, fn) {
@@ -823,6 +835,7 @@ var dash = {
   kebabCase: kebabCase,
   keys: keys,
   map: map,
+  mapKeys: mapKeys,
   mapValues: mapValues,
   mapWith: mapWith,
   merge: merge,

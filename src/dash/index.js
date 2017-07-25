@@ -28,6 +28,7 @@ import isString from './isString'
 import kebabCase from './kebabCase'
 import keys from './keys'
 import map from './map'
+import mapKeys from './mapKeys'
 import mapValues from './mapValues'
 import mapWith from './mapWith'
 import merge from './merge'
@@ -80,6 +81,7 @@ export default {
   kebabCase,
   keys,
   map,
+  mapKeys,
   mapValues,
   mapWith,
   merge,
