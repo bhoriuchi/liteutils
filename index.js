@@ -636,6 +636,16 @@ function omitBy(obj, fn) {
 omitBy._accepts = [Object];
 omitBy._dependencies = ['dash.isHash', 'dash.forEach'];
 
+function omit(obj, omits) {
+  omits = Array.isArray(omits) ? omits : [];
+  return omitBy(obj, function (v, k) {
+    return omits.indexOf(k) !== -1;
+  });
+}
+
+omit._accepts = [Object];
+omit._dependencies = ['dash.omitBy'];
+
 function pickBy(obj, fn) {
   var newObj = {};
   if (!isHash(obj)) return newObj;
@@ -851,6 +861,7 @@ var dash = {
   mapValues: mapValues,
   mapWith: mapWith,
   merge: merge,
+  omit: omit,
   omitBy: omitBy,
   pickBy: pickBy,
   pretty: pretty,

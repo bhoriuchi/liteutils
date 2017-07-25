@@ -32,6 +32,7 @@ import mapKeys from './mapKeys'
 import mapValues from './mapValues'
 import mapWith from './mapWith'
 import merge from './merge'
+import omit from './omit'
 import omitBy from './omitBy'
 import pickBy from './pickBy'
 import pretty from './pretty'
@@ -86,6 +87,7 @@ export default {
   mapValues,
   mapWith,
   merge,
+  omit,
   omitBy,
   pickBy,
   pretty,
