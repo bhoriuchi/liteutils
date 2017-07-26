@@ -1,3 +1,4 @@
+/* eslint new-cap: ["error", { "newIsCap": false }] */
 import _query from './index'
 import mapNodes from '../query/mapNodes'
 import forEach from '../dash/forEach'
