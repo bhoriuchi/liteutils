@@ -1,6 +1,9 @@
 import isString from './isString'
 
 function toPath (pathString) {
+  if (Array.isArray(pathString)) return pathString
+  pathString = String(pathString)
+
   // taken from lodash - https://github.com/lodash/lodash
   let pathRx = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(\.|\[\])(?:\4|$))/g
   let pathArray = []

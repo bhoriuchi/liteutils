@@ -257,8 +257,19 @@ function isDate(obj) {
 isDate._accepts = ['ANY'];
 isDate._dependencies = [];
 
+function isEmpty(obj) {
+  if (obj === '' || obj === null || obj === undefined) return true;
+  if ((obj instanceof Buffer || Array.isArray(obj)) && !obj.length) return true;
+  if ((obj instanceof Map || obj instanceof Set) && !obj.size) return true;
+  if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object' && !Object.keys(obj).length) return true;
+  return false;
+}
+
+isEmpty._accepts = ['ANY'];
+isEmpty._dependencies = [];
+
 function isHash(obj) {
-  return isObject(obj) && !isArray(obj) && !isDate(obj);
+  return isObject(obj) && !isArray(obj) && !isDate(obj) && !isEmpty(obj);
 }
 
 isHash._accepts = ['ANY'];
@@ -405,6 +416,9 @@ first._accepts = [Array];
 first._dependencies = [];
 
 function toPath(pathString) {
+  if (Array.isArray(pathString)) return pathString;
+  pathString = String(pathString);
+
   // taken from lodash - https://github.com/lodash/lodash
   var pathRx = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(\.|\[\])(?:\4|$))/g;
   var pathArray = [];
@@ -444,7 +458,7 @@ function has(obj, path$$1) {
   var fields = isArray(path$$1) ? path$$1 : toPath(path$$1);
   if (!fields.length) return false;
   forEach(fields, function (field) {
-    if (obj[field] === undefined) {
+    if (!obj.hasOwnProperty(field) || obj.hasOwnProperty(field) && obj[field] === undefined) {
       found = false;
       return false;
     }
@@ -487,17 +501,6 @@ function isBoolean(obj) {
 
 isBoolean._accepts = ['ANY'];
 isBoolean._dependencies = [];
-
-function isEmpty(obj) {
-  if (obj === '' || obj === null || obj === undefined) return true;
-  if ((obj instanceof Buffer || Array.isArray(obj)) && !obj.length) return true;
-  if ((obj instanceof Map || obj instanceof Set) && !obj.size) return true;
-  if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object' && !Object.keys(obj).length) return true;
-  return false;
-}
-
-isEmpty._accepts = ['ANY'];
-isEmpty._dependencies = [];
 
 function isNumber(obj) {
   return typeof obj === 'number' && !isNaN(obj);

@@ -7,7 +7,7 @@ function has (obj, path) {
   let fields = isArray(path) ? path : toPath(path)
   if (!fields.length) return false
   forEach(fields, (field) => {
-    if (obj[field] === undefined) {
+    if (!obj.hasOwnProperty(field) || (obj.hasOwnProperty(field) && obj[field] === undefined)) {
       found = false
       return false
     }
