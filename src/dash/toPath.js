@@ -1,8 +1,10 @@
 import isString from './isString'
+import isNumber from './isNumber'
+import isArray from './isArray'
 
 function toPath (pathString) {
-  if (Array.isArray(pathString)) return pathString
-  pathString = String(pathString)
+  if (isArray(pathString)) return pathString
+  if (isNumber(pathString)) return [ pathString ]
 
   // taken from lodash - https://github.com/lodash/lodash
   let pathRx = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(\.|\[\])(?:\4|$))/g
@@ -18,6 +20,6 @@ function toPath (pathString) {
 }
 
 toPath._accepts = [String]
-toPath._dependencies = ['dash.isString']
+toPath._dependencies = ['dash.isString', 'dash.isArray', 'dash.isNumber']
 
 export default toPath

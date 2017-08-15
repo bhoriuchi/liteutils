@@ -415,9 +415,16 @@ function first(array) {
 first._accepts = [Array];
 first._dependencies = [];
 
+function isNumber(obj) {
+  return typeof obj === 'number' && !isNaN(obj);
+}
+
+isNumber._accepts = ['ANY'];
+isNumber._dependencies = [];
+
 function toPath(pathString) {
-  if (Array.isArray(pathString)) return pathString;
-  pathString = String(pathString);
+  if (isArray(pathString)) return pathString;
+  if (isNumber(pathString)) return [pathString];
 
   // taken from lodash - https://github.com/lodash/lodash
   var pathRx = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(\.|\[\])(?:\4|$))/g;
@@ -433,7 +440,7 @@ function toPath(pathString) {
 }
 
 toPath._accepts = [String];
-toPath._dependencies = ['dash.isString'];
+toPath._dependencies = ['dash.isString', 'dash.isArray', 'dash.isNumber'];
 
 function get$1(obj, path$$1, defaultValue) {
   var value = obj;
@@ -501,13 +508,6 @@ function isBoolean(obj) {
 
 isBoolean._accepts = ['ANY'];
 isBoolean._dependencies = [];
-
-function isNumber(obj) {
-  return typeof obj === 'number' && !isNaN(obj);
-}
-
-isNumber._accepts = ['ANY'];
-isNumber._dependencies = [];
 
 function isPromise(obj) {
   return obj instanceof Promise || obj && isFunction(obj.then) && isFunction(obj.catch);
