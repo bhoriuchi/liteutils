@@ -712,16 +712,17 @@ reduce._accepts = [Object, Array];
 reduce._dependencies = ['dash.forEach', 'dash.isObject', 'dash.isArray', 'dash.isFunction', 'dash.identity', 'dash.keys'];
 
 function set$1(obj, path$$1, val) {
-  var fields = isArray(path$$1) ? path$$1 : toPath(path$$1);
+  var fields = Array.isArray(path$$1) ? path$$1 : toPath(path$$1);
+  var prop = fields.shift();
 
-  forEach(fields, function (field, idx) {
-    if (idx === fields.length - 1) obj[field] = val;else if (!obj[field]) obj[field] = isNumber(field) ? [] : {};
-    obj = obj[field];
-  });
+  if (!fields.length) return obj[prop] = value;
+  if (!has(obj, prop)) obj[prop] = fields.length >= 1 && typeof fields[0] === 'number' ? [] : {};
+
+  set$1(obj[prop], fields, value);
 }
 
 set$1._accepts = [Object, Array];
-set$1._dependencies = ['dash.isArray', 'dash.isNumber', 'dash.toPath', 'dash.forEach'];
+set$1._dependencies = ['dash.toPath', 'dash.has'];
 
 function stringify(obj) {
   try {

@@ -1,24 +1,20 @@
-import isArray from './isArray'
-import isNumber from './isNumber'
 import toPath from './toPath'
-import forEach from './forEach'
+import has from './has'
 
 function set (obj, path, val) {
-  let fields = isArray(path) ? path : toPath(path)
+  let fields = Array.isArray(path) ? path : toPath(path)
+  let prop = fields.shift()
 
-  forEach(fields, (field, idx) => {
-    if (idx === fields.length - 1) obj[field] = val
-    else if (!obj[field]) obj[field] = isNumber(field) ? [] : {}
-    obj = obj[field]
-  })
+  if (!fields.length) return obj[prop] = value
+  if (!has(obj, prop)) obj[prop] = (fields.length >= 1 && typeof fields[0] === 'number') ? [] : {}
+
+  set(obj[prop], fields, value)
 }
 
 set._accepts = [Object, Array]
 set._dependencies = [
-  'dash.isArray',
-  'dash.isNumber',
   'dash.toPath',
-  'dash.forEach'
+  'dash.has'
 ]
 
 export default set
