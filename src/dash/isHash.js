@@ -11,7 +11,8 @@ isHash._accepts = ['ANY']
 isHash._dependencies = [
   'dash.isArray',
   'dash.isDate',
-  'dash.isObject'
+  'dash.isObject',
+  'dash.isEmpty'
 ]
 
 export default isHash

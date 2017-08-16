@@ -273,7 +273,7 @@ function isHash(obj) {
 }
 
 isHash._accepts = ['ANY'];
-isHash._dependencies = ['dash.isArray', 'dash.isDate', 'dash.isObject'];
+isHash._dependencies = ['dash.isArray', 'dash.isDate', 'dash.isObject', 'dash.isEmpty'];
 
 function includes(obj, key) {
   return isArray(obj) && obj.indexOf(key) !== -1;
