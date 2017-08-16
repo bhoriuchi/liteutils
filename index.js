@@ -443,18 +443,16 @@ toPath._accepts = [String];
 toPath._dependencies = ['dash.isString', 'dash.isArray', 'dash.isNumber'];
 
 function get$1(obj, path$$1, defaultValue) {
-  var value = obj;
   var fields = isArray(path$$1) ? path$$1 : toPath(path$$1);
-  if (fields.length === 0) return defaultValue;
 
-  try {
-    for (var f in fields) {
-      if (!value[fields[f]]) return defaultValue;else value = value[fields[f]];
-    }
-  } catch (err) {
-    return defaultValue;
+  var idx = 0;
+  var length = fields.length;
+
+  while (obj !== null && idx < length) {
+    obj = obj[fields[idx++]];
   }
-  return value;
+
+  return idx && idx === length ? obj : defaultValue;
 }
 
 get$1._accepts = [Object, Array];

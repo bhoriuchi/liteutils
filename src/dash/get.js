@@ -2,19 +2,17 @@ import isArray from './isArray'
 import toPath from './toPath'
 
 function get (obj, path, defaultValue) {
-  let value = obj
   let fields = isArray(path) ? path : toPath(path)
-  if (fields.length === 0) return defaultValue
 
-  try {
-    for (let f in fields) {
-      if (!value[fields[f]]) return defaultValue
-      else value = value[fields[f]]
-    }
-  } catch (err) {
-    return defaultValue
+  let idx = 0
+  const length = fields.length
+
+  while (obj !== null && idx < length) {
+    obj = obj[fields[idx++]]
   }
-  return value
+
+  return (idx && idx === length) ? obj : defaultValue
+
 }
 
 get._accepts = [Object, Array]
