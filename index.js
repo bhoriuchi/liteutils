@@ -459,21 +459,28 @@ get$1._accepts = [Object, Array];
 get$1._dependencies = ['dash.isArray', 'dash.toPath'];
 
 function has(obj, path$$1) {
-  var found = true;
-  var fields = isArray(path$$1) ? path$$1 : toPath(path$$1);
-  if (!fields.length) return false;
-  forEach(fields, function (field) {
-    if (!obj.hasOwnProperty(field) || obj.hasOwnProperty(field) && obj[field] === undefined) {
-      found = false;
-      return false;
+  path$$1 = toPath(path$$1);
+
+  var index = -1;
+  var _path = path$$1,
+      length = _path.length;
+
+  var result = false;
+  var key = void 0;
+
+  while (++index < length) {
+    key = path$$1[index];
+    if (!(result = obj != null && Object.prototype.hasOwnProperty.call(obj, key))) {
+      break;
     }
-    obj = obj[field];
-  });
-  return found;
+    obj = obj[key];
+  }
+
+  return result;
 }
 
 has._accepts = [Object, Array];
-has._dependencies = ['dash.forEach', 'dash.isArray', 'dash.toPath'];
+has._dependencies = ['dash.toPath'];
 
 function identity(value) {
   return value;

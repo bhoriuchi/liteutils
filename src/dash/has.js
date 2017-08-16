@@ -1,25 +1,26 @@
-import forEach from './forEach'
-import isArray from './isArray'
 import toPath from './toPath'
 
 function has (obj, path) {
-  let found = true
-  let fields = isArray(path) ? path : toPath(path)
-  if (!fields.length) return false
-  forEach(fields, (field) => {
-    if (!obj.hasOwnProperty(field) || (obj.hasOwnProperty(field) && obj[field] === undefined)) {
-      found = false
-      return false
+  path = toPath(path)
+
+  let index = -1
+  let { length } = path
+  let result = false
+  let key
+
+  while (++index < length) {
+    key = path[index]
+    if (!(result = obj != null && Object.prototype.hasOwnProperty.call(obj, key))) {
+      break
     }
-    obj = obj[field]
-  })
-  return found
+    obj = obj[key]
+  }
+
+  return result
 }
 
 has._accepts = [Object, Array]
 has._dependencies = [
-  'dash.forEach',
-  'dash.isArray',
   'dash.toPath'
 ]
 
